@@ -1,0 +1,15 @@
+project:
+  name: "HJ Holdings KOSPI200 적정가치 리서치부"
+  timezone: "Asia/Seoul"
+  output_csv: "output/kospi200_targetprice_table.csv"
+  template_csv: "output/kospi200_targetprice_table_template.csv"
+
+collection:
+  mode: "template_only"  # template_only | semi_auto | auto
+  allow_network: false
+  max_requests_per_minute: 30
+
+quality:
+  require_source: true
+  require_latest_report_date: false
+  stale_report_days_threshold: 90

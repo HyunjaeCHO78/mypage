@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environment
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS/Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Logs and local artifacts
+logs/*.log
+logs/*.tmp
+
+# Data artifacts (원본 대용량 파일은 필요시 별도 정책으로 관리)
+data/raw/*.parquet
+data/raw/*.feather
