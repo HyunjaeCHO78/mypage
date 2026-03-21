@@ -1,0 +1,15 @@
+# 데이터 소스 우선순위(초안)
+# 실제 적용 전 각 소스의 약관/라이선스/접근정책을 확인해야 함
+sources:
+  - name: "수동입력(애널리스트 리포트 원문 확인)"
+    priority: 1
+    mode: "manual"
+  - name: "증권사 공개 리서치 페이지"
+    priority: 2
+    mode: "semi_auto"
+  - name: "포털/데이터 벤더 컨센서스"
+    priority: 3
+    mode: "semi_auto"
+  - name: "유료 데이터 터미널/API"
+    priority: 4
+    mode: "auto"
