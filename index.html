@@ -1,65 +1,725 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2023년 버킷리스트</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;500;600;700&display=swap');
-        *{
-            font-family: 'Hahmlet', serif;
-        }
-        .title {
-            color: white;
-            background-color: tomato;
-            font-size: 24px;
-            padding: 4px 14px;
-            border-radius: 8px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HJ 추세선 거래 운영 기준서 v1</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --accent: #22c55e;
+      --warn: #f59e0b;
+      --danger: #f87171;
+      --border: rgba(148, 163, 184, 0.18);
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+    }
 
-        .bg {
-            width: 360px;
-            background-image: url("https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/bg-grid.png");
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        .msg {
-            font-weight: bold;
-        }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #020617 0%, #0f172a 30%, #111827 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
 
-        .bucket {
-            width: 160px;
-            height: 160px;
-        }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-        .img1 {
-            background-image: url("https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/bucket-red.png");
-            background-size: cover;
-            background-position: center;
-        }
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 64px;
+    }
 
-        .img2 {
-            background-image: url("https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/bucket-lightred.png");
-            background-size: cover;
-            background-position: center;
-        }
-    </style>
-    <link rel="stylesheet" type="text/css" href="https://s3.ap-northeast-2.amazonaws.com/materials.spartacodingclub.kr/bucketList/sparta-bucket2.css">
+    .hero {
+      display: grid;
+      gap: 20px;
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 32%), rgba(15, 23, 42, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow,
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .eyebrow {
+      background: rgba(56, 189, 248, 0.12);
+      color: #bae6fd;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      max-width: 14ch;
+    }
+
+    .hero p,
+    .section-intro,
+    .muted {
+      color: var(--muted);
+    }
+
+    .hero-grid,
+    .grid-2,
+    .grid-3,
+    .score-grid,
+    .journal-grid,
+    .priority-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-grid,
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3,
+    .score-grid,
+    .journal-grid,
+    .priority-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card,
+    .panel,
+    .score-card,
+    .priority-card {
+      background: rgba(17, 24, 39, 0.82);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3,
+    .panel h3,
+    .score-card h3,
+    .priority-card h3 {
+      margin-bottom: 12px;
+      font-size: 1.05rem;
+    }
+
+    .keyline {
+      border-left: 4px solid var(--primary);
+      padding-left: 16px;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    section {
+      margin-top: 28px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      background: rgba(34, 197, 94, 0.12);
+      color: #bbf7d0;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li + li {
+      margin-top: 8px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: #cbd5e1;
+      background: rgba(30, 41, 59, 0.7);
+      font-size: 14px;
+    }
+
+    .rule-positive { border-top: 3px solid var(--accent); }
+    .rule-warning { border-top: 3px solid var(--warn); }
+    .rule-danger { border-top: 3px solid var(--danger); }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.78);
+    }
+
+    .table th,
+    .table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .table th {
+      color: #bae6fd;
+      font-size: 14px;
+      background: rgba(30, 41, 59, 0.9);
+    }
+
+    .table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      padding: 22px;
+      border-radius: 18px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      color: #e0f2fe;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid,
+      .grid-2,
+      .grid-3,
+      .score-grid,
+      .journal-grid,
+      .priority-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        width: min(100% - 20px, 1000px);
+        padding-top: 20px;
+      }
+
+      .hero,
+      .card,
+      .panel,
+      .score-card,
+      .priority-card {
+        padding: 18px;
+      }
+    }
+  </style>
 </head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">프로젝트명 · HJ 추세선 거래 운영 기준서 v1</span>
+      <h1>복잡한 시장을 단순한 추세선 Playbook으로 축소하는 운영 기준</h1>
+      <p>
+        이 기준서의 목표는 A+ 셋업만 선별하고, 손실은 작게 제한하며, 추세의 몸통을 반복적으로 회수하는
+        구조 기반 트레이딩 시스템을 만드는 것이다. 이후 체크리스트, 저널 양식, PineScript 설계,
+        백테스트 규칙, 자동화 규칙으로 확장할 수 있도록 문서 구조를 정리했다.
+      </p>
+      <div class="hero-grid">
+        <div class="card">
+          <h3>전략 한 줄 정의</h3>
+          <p class="keyline">
+            상위 타임프레임부터 실행 타임프레임까지 유효한 추세선 구조를 연결하고, 실행봉에서 3터치 이상
+            확인된 추세선이 실제로 붕괴할 때 반전 방향으로 진입하되, Safety line 기준으로 리스크를 관리하고,
+            새 방향 추세선 또는 주요 수평 레벨을 따라 청산하는 구조 기반 A+ 추세 전환 전략.
+          </p>
+        </div>
+        <div class="card">
+          <h3>111 운영 원칙</h3>
+          <ul>
+            <li><strong>One strategy</strong>: 추세선 브레이크 Playbook 하나만 중심으로 운영</li>
+            <li><strong>One standard</strong>: 하나의 기준서와 같은 체크 기준만 유지</li>
+            <li><strong>One hour a day</strong>: 매일 최소 1시간 리뷰·관찰·복기</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pill-list">
+        <span class="pill">단순성 우선</span>
+        <span class="pill">A+ 셋업만 반복</span>
+        <span class="pill">몸통 회수 중심</span>
+        <span class="pill">Fakeout은 감소 대상</span>
+        <span class="pill">실행봉 하나만 사용</span>
+        <span class="pill">늦은 진입 과감히 패스</span>
+      </div>
+    </section>
 
-<body class="bg-t3 center">
-    <h1 class="title-t4">2023 신년계획</h1>
-    <p class="msg">올해는 꼭 모두 지키자! </p>
-    <div class="row flex-row wrap">
-        <div class="bucket img1-t2 center">일본어회화</div>
-        <div class="bucket img2 center">JLPT1급</div>
-        <div class="bucket img2 center">g-telp 75점</div>
-        <div class="bucket img1-t4 center">마케팅공부</div>
-        <div class="bucket img1 center">나만의쇼핑몰</div>
-        <div class="bucket img2-t5 center">주식공부</div>
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">핵심 철학</span>
+          <h2>시스템이 유지해야 할 10가지 원칙</h2>
+        </div>
+      </div>
+      <div class="grid-2">
+        <article class="panel rule-positive">
+          <ol>
+            <li>전략은 단순해야 한다.</li>
+            <li>모든 브레이크를 거래하지 않는다.</li>
+            <li>A+ 셋업만 반복한다.</li>
+            <li>목표는 꼭지·바닥이 아니라 몸통 회수다.</li>
+            <li>Action line과 Safety line이 진입·청산의 핵심이다.</li>
+          </ol>
+        </article>
+        <article class="panel rule-warning">
+          <ol start="6">
+            <li>Fakeout은 없앨 수 없고 줄일 수만 있다.</li>
+            <li>One strategy, one standard, one execution timeframe을 유지한다.</li>
+            <li>Mediocre setup은 의도적으로 제거한다.</li>
+            <li>늦은 진입, 고위험 진입, 뉴스·비활성 시간대 진입은 패스한다.</li>
+            <li>성공의 핵심은 전략 추가가 아니라 하나의 전략을 깊게 반복하는 것이다.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">핵심 용어</span>
+          <h2>Action line, Safety line, Confluence를 같은 언어로 정의</h2>
+        </div>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <h3>Action line</h3>
+          <p>가격이 실제로 돌파한 추세선으로, 진입 신호를 주는 기준선이다.</p>
+        </article>
+        <article class="card">
+          <h3>Safety line</h3>
+          <p>Action line의 반대편 구조선으로, 손절·청산·리스크 관리의 기준선이다.</p>
+        </article>
+        <article class="card">
+          <h3>Three-touch trendline</h3>
+          <p>최소 3개의 유효 터치포인트가 있는 추세선만 우선 사용한다.</p>
+        </article>
+        <article class="card">
+          <h3>Fakeout</h3>
+          <p>브레이크처럼 보였지만 곧바로 반대로 뒤집히는 실패 돌파다.</p>
+        </article>
+        <article class="card">
+          <h3>Confluence</h3>
+          <p>상위봉, 수평 레벨, 종가 확정, 리테스트, 시간대, 데이터 기간 등의 보강 요소다.</p>
+        </article>
+        <article class="card">
+          <h3>A+ setup</h3>
+          <p>점수와 구조가 충분히 높고 mediocre가 아닌 우위 있는 셋업만 의미한다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">타임프레임 운영</span>
+          <h2>탑다운 분석은 하되, 실행 판단은 하나의 실행봉에서만</h2>
+        </div>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>원칙</th>
+            <th>권장 설정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>실행봉</td>
+            <td>진입·청산 판단은 반드시 실행봉에서만 한다.</td>
+            <td>전략마다 하나만 고정</td>
+          </tr>
+          <tr>
+            <td>탑다운 분석</td>
+            <td>상위봉부터 실행봉까지 구조 정렬 여부를 확인한다.</td>
+            <td>상위 방향과 강하게 충돌하면 패스</td>
+          </tr>
+          <tr>
+            <td>스윙형</td>
+            <td>더 긴 구조와 데이터 기간을 중시한다.</td>
+            <td>4시간봉 / 1시간봉</td>
+          </tr>
+          <tr>
+            <td>데이형</td>
+            <td>세션, 종가 확인, 리테스트를 더 엄격하게 본다.</td>
+            <td>15분봉 / 5분봉</td>
+          </tr>
+          <tr>
+            <td>훈련형</td>
+            <td>주관성을 줄이기 위해 먼저 1시간봉에 익숙해진다.</td>
+            <td>1시간봉 우선</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">추세선 작성 규칙</span>
+          <h2>최신 유효 접점과 3터치 구조를 우선하는 선만 사용</h2>
+        </div>
+      </div>
+      <div class="grid-3">
+        <article class="panel">
+          <h3>상승 추세선</h3>
+          <ul>
+            <li>Point A = 가장 낮은 유효 저점</li>
+            <li>Point B = 다음 higher low</li>
+            <li>가격이 중간에 관통하면 무효</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h3>하락 추세선</h3>
+          <ul>
+            <li>Point A = 가장 높은 유효 고점</li>
+            <li>Point B = 다음 lower high</li>
+            <li>가격이 중간에 관통하면 무효</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h3>공통 관리</h3>
+          <ul>
+            <li>Point B는 가능한 최신 유효 접점을 쓴다.</li>
+            <li>이전 Point B는 다음 Point A로 이어질 수 있다.</li>
+            <li>Fan 구조로 더 가파른 선을 계속 갱신할 수 있다.</li>
+            <li>오래전에 무효화된 선은 버린다.</li>
+            <li>동일 조건이면 3터치와 긴 데이터 기간을 우선한다.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">A+ Playbook</span>
+          <h2>Three-Touch Trendline Break Playbook의 진입부터 청산까지</h2>
+        </div>
+      </div>
+      <div class="grid-2">
+        <article class="panel rule-positive">
+          <h3>진입 조건</h3>
+          <ol>
+            <li>3터치 이상 유효 추세선</li>
+            <li>실제 브레이크 발생</li>
+            <li>Safety line 존재</li>
+            <li>손절이 과도하지 않음</li>
+            <li>가능하면 1주 이상 데이터 누적</li>
+            <li>상위봉과 강하게 충돌하지 않음</li>
+          </ol>
+        </article>
+        <article class="panel rule-warning">
+          <h3>방향 · 손절 · 보유 · 청산</h3>
+          <ul>
+            <li>상승 추세선 하향 이탈 → 숏</li>
+            <li>하락 추세선 상향 돌파 → 롱</li>
+            <li>손절은 Safety line 바깥 + wiggle room 허용</li>
+            <li>새 방향 추세선 유지 동안 보유, 더 가파른 선으로 trailing 가능</li>
+            <li>Safety line 붕괴 또는 주요 수평 레벨 도달 시 청산</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">브레이크 질 필터</span>
+          <h2>모든 브레이크가 아니라 질 좋은 브레이크만 선별</h2>
+        </div>
+      </div>
+      <div class="score-grid">
+        <article class="score-card"><h3>1. 종가 확인</h3><p>윅만 돌파한 경우는 무시하고, 종가가 브레이크 방향에서 마감해야 한다.</p></article>
+        <article class="score-card"><h3>2. Break &amp; Retest</h3><p>브레이크 후 반대편에서 다시 테스트하는지 본다. 짧은 시간대일수록 중요하다.</p></article>
+        <article class="score-card"><h3>3. 상위봉 정렬</h3><p>상위 타임프레임 방향과 정렬될수록 품질이 좋아진다.</p></article>
+        <article class="score-card"><h3>4. 수평 레벨 동시 확인</h3><p>추세선과 수평 지지·저항이 함께 돌파·이탈되면 신뢰도가 높아진다.</p></article>
+        <article class="score-card"><h3>5. 세션 필터</h3><p>점심장, 비활성 시간, 이상한 시간대는 피하고 활발한 세션을 우선한다.</p></article>
+        <article class="score-card"><h3>6. 데이터 가중치</h3><p>동일한 3터치라도 1주 이상 데이터가 쌓인 구조를 더 높게 평가한다.</p></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">리스크 관리</span>
+          <h2>저위험·고위험 판단과 포지션 사이징 기준</h2>
+        </div>
+      </div>
+      <div class="grid-2">
+        <article class="panel rule-positive">
+          <h3>저위험 / 고위험 판단</h3>
+          <ul>
+            <li><strong>저위험</strong>: 진입가와 Safety line 거리, 포지션 크기 기준 허용 손실이 계좌 규칙 안에 들어오는 상태</li>
+            <li><strong>고위험</strong>: 구조는 있어도 손절이 멀고, 사이즈 축소 후에도 허용 손실 범위를 넘는 상태</li>
+            <li>구조 좋고 가까움 → 정상 사이즈</li>
+            <li>구조 좋지만 멂 → 축소 사이즈</li>
+            <li>구조 나쁘고 멂 → 패스</li>
+          </ul>
+        </article>
+        <article class="panel rule-danger">
+          <h3>포지션 사이징 규칙</h3>
+          <ul>
+            <li>기본 1회 리스크는 계좌의 1%</li>
+            <li>훈련형은 0.5~1%</li>
+            <li>포지션 크기 = 허용 손실 금액 / (진입가 - 손절가)</li>
+            <li>A+ 셋업이어도 몰빵 금지</li>
+            <li>손절 먼저 정하고 진입한다</li>
+            <li>손절 감당 안 되는 사이즈는 금지</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">운영 체크리스트</span>
+          <h2>진입 전, 보유 중, 청산 시에 반드시 확인할 것</h2>
+        </div>
+      </div>
+      <div class="grid-3">
+        <article class="panel">
+          <h3>진입 전 체크리스트</h3>
+          <ul>
+            <li>상위봉 방향 확인</li>
+            <li>3터치 추세선 확인</li>
+            <li>실제 브레이크 확인</li>
+            <li>종가 마감 확인</li>
+            <li>Safety line 존재</li>
+            <li>손절 감당 가능</li>
+            <li>늦은 진입 아님</li>
+            <li>수평 레벨 확인</li>
+            <li>세션/뉴스 문제 없음</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h3>보유 및 손절 규칙</h3>
+          <ul>
+            <li>손절은 Safety line 바깥에 둔다.</li>
+            <li>진입 전에 손절가를 확정한다.</li>
+            <li>진입 후 손절을 넓히지 않는다.</li>
+            <li>추세선은 trailing stop 역할을 한다.</li>
+            <li>짧은 시간대는 더 빠른 이익 보호를 고려한다.</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h3>청산 규칙</h3>
+          <ul>
+            <li>Trendline exit: Safety line 또는 더 가파른 추세선 붕괴 시</li>
+            <li>Horizontal exit: 주요 수평 지지·저항 도달 시</li>
+            <li>운영 종료 exit: 세션 종료, 이벤트 전, 플랫폼 규칙상 종료 필요 시</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">패스 & Fakeout</span>
+          <h2>패스해야 할 거래를 줄이지 말고, 오히려 늘려라</h2>
+        </div>
+      </div>
+      <div class="grid-2">
+        <article class="panel rule-warning">
+          <h3>패스 우선 상황</h3>
+          <ul>
+            <li>손절이 너무 멀다</li>
+            <li>이미 너무 늦은 자리다</li>
+            <li>뉴스·갭 직전이다</li>
+            <li>비활성 시간대다</li>
+            <li>수평 레벨이 바로 앞이다</li>
+            <li>종가 확정 전이다</li>
+            <li>리테스트 없이 급히 들어가고 싶다</li>
+            <li>상위봉과 강하게 충돌한다</li>
+            <li>Fakeout 가능성이 높다</li>
+            <li>A+ 점수 미달이다</li>
+          </ul>
+        </article>
+        <article class="panel rule-danger">
+          <h3>Fakeout 대응 규칙</h3>
+          <ul>
+            <li>Fakeout은 정상 시장 행동이며 완전 제거 대상이 아니다.</li>
+            <li>종가 확인, retest, 상위봉 정렬, 수평 레벨, 시간대, 데이터 기간으로 감소시킨다.</li>
+            <li>발생 시 revenge trade 금지</li>
+            <li>빠진 필터를 기록하고 다음 셋업을 기다린다.</li>
+            <li>Fakeout은 반대 방향 진짜 기회의 정보가 될 수 있다.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">A+ 점수표</span>
+          <h2>숫자로 mediocre를 제거하는 기본 100점 체계</h2>
+        </div>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>항목</th>
+            <th>점수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>필수</td><td>3터치 유효 추세선</td><td>20점</td></tr>
+          <tr><td>필수</td><td>실제 브레이크</td><td>15점</td></tr>
+          <tr><td>필수</td><td>Safety line 존재</td><td>15점</td></tr>
+          <tr><td>필수</td><td>손절 감당 가능</td><td>15점</td></tr>
+          <tr><td>품질</td><td>상위봉 정렬</td><td>10점</td></tr>
+          <tr><td>품질</td><td>데이터 기간 충분</td><td>10점</td></tr>
+          <tr><td>품질</td><td>종가 확인</td><td>5점</td></tr>
+          <tr><td>품질</td><td>Break and retest</td><td>5점</td></tr>
+          <tr><td>품질</td><td>수평 레벨 동시 확인</td><td>3점</td></tr>
+          <tr><td>품질</td><td>세션 양호</td><td>2점</td></tr>
+        </tbody>
+      </table>
+      <div class="pill-list">
+        <span class="pill">85점 이상 = A+</span>
+        <span class="pill">70~84점 = A</span>
+        <span class="pill">55~69점 = B</span>
+        <span class="pill">54점 이하 = 패스 권장</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">기록 체계</span>
+          <h2>진입한 거래와 패스한 거래 모두 기록한다</h2>
+        </div>
+      </div>
+      <div class="journal-grid">
+        <article class="priority-card">
+          <h3>매매 후 기록 항목</h3>
+          <ul>
+            <li>날짜, 종목, 실행봉, 상위봉 방향</li>
+            <li>셋업 종류, 3터치 여부, 데이터 기간</li>
+            <li>종가 확인 여부, retest 여부, 수평 레벨 여부</li>
+            <li>세션 시간, 뉴스·갭 여부</li>
+            <li>진입가, 손절가, 청산가</li>
+            <li>계약 수 / 포지션 크기</li>
+            <li>고위험·저위험 판정</li>
+            <li>exit 방식, fakeout 여부, mediocre 여부</li>
+            <li>규칙 위반 여부, 왜 A+였는지</li>
+            <li>왜 패스했어야 했는지</li>
+          </ul>
+        </article>
+        <article class="priority-card">
+          <h3>패스 거래 기록</h3>
+          <ul>
+            <li>날짜, 종목, 실행봉</li>
+            <li>왜 관심이 갔는가</li>
+            <li>왜 패스했는가</li>
+            <li>패스 후 실제 어떻게 움직였는가</li>
+            <li>패스 판단이 맞았는가</li>
+          </ul>
+        </article>
+        <article class="priority-card">
+          <h3>초보 운영 규칙</h3>
+          <ul>
+            <li>1시간봉 우선</li>
+            <li>마이크로 1계약 또는 최소 단위</li>
+            <li>1회 리스크 0.5~1%</li>
+            <li>PnL 창 최소 노출</li>
+            <li>A+ 아니면 패스</li>
+            <li>한 종목 먼저 익숙해지기</li>
+            <li>돈보다 구조 보기</li>
+            <li>알람과 루틴 사용</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">코덱스 작업 우선순위</span>
+          <h2>이 기준서를 바탕으로 다음 단계로 확장할 항목</h2>
+        </div>
+      </div>
+      <div class="priority-grid">
+        <article class="priority-card"><h3>1</h3><p>문서 구조화</p></article>
+        <article class="priority-card"><h3>2</h3><p>체크리스트 시트 제작</p></article>
+        <article class="priority-card"><h3>3</h3><p>저널 템플릿 제작</p></article>
+        <article class="priority-card"><h3>4</h3><p>PineScript 규칙 설계서 작성</p></article>
+        <article class="priority-card"><h3>5</h3><p>백테스트 기준표 작성</p></article>
+        <article class="priority-card"><h3>6~7</h3><p>자동화 가능/불가능 요소 분류 및 추세선 주관성 최소화 규칙 제안</p></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-header">
+        <div>
+          <span class="badge">금지 사항</span>
+          <h2>시스템을 망가뜨리는 행동은 명시적으로 금지</h2>
+        </div>
+      </div>
+      <div class="grid-2">
+        <article class="panel rule-danger">
+          <ul>
+            <li>추세선 브레이크를 전부 진입하는 방식</li>
+            <li>손절 없이 진입</li>
+            <li>A+라는 이유로 과도한 사이즈 진입</li>
+            <li>늦은 진입을 억지로 합리화</li>
+          </ul>
+        </article>
+        <article class="panel rule-danger">
+          <ul>
+            <li>Fakeout 후 revenge trade</li>
+            <li>여러 전략 / 여러 기준 혼합</li>
+            <li>기록 없는 감각 매매</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      이 시스템의 핵심은 3터치 브레이크 자체가 아니라, 충분한 시간과 데이터로 검증된 구조인지,
+      Safety line 기준 손실이 감당 가능한지, Fakeout 필터를 통과했는지, 그리고 A+가 아닐 때 과감히 패스할 수 있는지에 있다.
     </div>
-
+  </main>
 </body>
-
 </html>
