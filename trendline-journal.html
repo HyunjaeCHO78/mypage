@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HJ 추세선 거래 저널 템플릿 v1</title>
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-soft: #0f172a;
+      --panel: rgba(15, 23, 42, 0.94);
+      --panel-strong: rgba(17, 24, 39, 0.98);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.18);
+      --primary: #38bdf8;
+      --accent: #22c55e;
+      --warn: #f59e0b;
+      --danger: #f87171;
+      --shadow: 0 18px 44px rgba(2, 6, 23, 0.38);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #020617 0%, #0b1120 28%, #111827 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 72px;
+    }
+
+    .hero,
+    .section,
+    .role-box,
+    .template-card,
+    .rating-card,
+    .question-card,
+    .mistake-card,
+    .tip-card {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 34%),
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.1), transparent 24%),
+        var(--panel);
+    }
+
+    .top-links,
+    .hero-meta,
+    .role-grid,
+    .usage-grid,
+    .template-grid,
+    .review-grid,
+    .mistake-grid,
+    .rating-grid,
+    .template-meta,
+    .inline-checks,
+    .copy-toolbar {
+      display: grid;
+      gap: 16px;
+    }
+
+    .top-links {
+      grid-template-columns: repeat(3, minmax(0, max-content));
+      justify-content: start;
+    }
+
+    .hero-meta,
+    .role-grid,
+    .usage-grid,
+    .rating-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .template-grid,
+    .review-grid,
+    .mistake-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .link-chip,
+    .badge,
+    .rating-badge,
+    .tag {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .link-chip {
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(56, 189, 248, 0.12);
+      color: #bae6fd;
+    }
+
+    .badge {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.78);
+      color: #cbd5e1;
+    }
+
+    .rating-badge.a-plus {
+      border: 1px solid rgba(34, 197, 94, 0.28);
+      background: rgba(34, 197, 94, 0.12);
+      color: #bbf7d0;
+    }
+
+    .rating-badge.a {
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      background: rgba(56, 189, 248, 0.12);
+      color: #bae6fd;
+    }
+
+    .rating-badge.b {
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      background: rgba(245, 158, 11, 0.12);
+      color: #fde68a;
+    }
+
+    .rating-badge.mediocre,
+    .rating-badge.pass {
+      border: 1px solid rgba(248, 113, 113, 0.28);
+      background: rgba(248, 113, 113, 0.12);
+      color: #fecaca;
+    }
+
+    .tag {
+      border: 1px dashed rgba(148, 163, 184, 0.22);
+      background: rgba(30, 41, 59, 0.65);
+      color: #cbd5e1;
+    }
+
+    h1, h2, h3, p, pre { margin: 0; }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.18;
+    }
+
+    h2 {
+      font-size: clamp(1.35rem, 2vw, 1.9rem);
+      line-height: 1.3;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      line-height: 1.35;
+    }
+
+    .muted,
+    .section-intro,
+    .meta-text,
+    .small-note {
+      color: var(--muted);
+    }
+
+    .hero-lead {
+      max-width: 76ch;
+      color: #dbe4f0;
+      font-size: 1.02rem;
+    }
+
+    .section {
+      margin-top: 24px;
+      padding: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .role-box,
+    .tip-card,
+    .rating-card,
+    .question-card,
+    .mistake-card,
+    .template-card {
+      padding: 18px;
+      background: rgba(17, 24, 39, 0.88);
+    }
+
+    .role-box {
+      border-top: 4px solid var(--primary);
+    }
+
+    .template-card.trade { border-top: 4px solid var(--accent); }
+    .template-card.pass { border-top: 4px solid var(--warn); }
+
+    .template-meta {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-bottom: 18px;
+    }
+
+    .copy-toolbar {
+      grid-template-columns: repeat(2, minmax(0, max-content));
+      justify-content: start;
+      margin-bottom: 14px;
+    }
+
+    .copy-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.84);
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .template-block {
+      border-radius: 20px;
+      border: 1px dashed rgba(148, 163, 184, 0.22);
+      background: rgba(15, 23, 42, 0.88);
+      overflow: hidden;
+    }
+
+    .template-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      background: rgba(30, 41, 59, 0.65);
+    }
+
+    pre {
+      padding: 18px;
+      white-space: pre-wrap;
+      word-break: keep-all;
+      color: #dbe4f0;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.93rem;
+      line-height: 1.7;
+    }
+
+    .check-list,
+    .simple-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .check-list li,
+    .simple-list li {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .check-list li:first-child,
+    .simple-list li:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .box-check,
+    .dot {
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      border-radius: 7px;
+      border: 2px solid rgba(148, 163, 184, 0.35);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      margin: 5px 4px 0;
+      border-width: 0;
+      background: var(--primary);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+    }
+
+    .inline-checks {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 16px;
+    }
+
+    .divider {
+      height: 1px;
+      margin: 18px 0;
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.28), rgba(148, 163, 184, 0.08));
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+      color: #e0f2fe;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .top-links,
+      .hero-meta,
+      .role-grid,
+      .usage-grid,
+      .template-grid,
+      .review-grid,
+      .mistake-grid,
+      .rating-grid,
+      .template-meta,
+      .inline-checks,
+      .copy-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        width: min(100% - 20px, 1000px);
+        padding-top: 20px;
+      }
+
+      .hero,
+      .section {
+        padding: 20px;
+        border-radius: 20px;
+      }
+
+      .section-header,
+      .template-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      pre {
+        font-size: 0.88rem;
+        padding: 16px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #020617;
+      }
+
+      .page {
+        width: 100%;
+        padding: 0;
+      }
+
+      .hero,
+      .section,
+      .role-box,
+      .template-card,
+      .rating-card,
+      .question-card,
+      .mistake-card,
+      .tip-card {
+        box-shadow: none;
+      }
+
+      a {
+        text-decoration: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="top-links">
+        <a class="link-chip" href="index.html">운영 기준서 보기</a>
+        <a class="link-chip" href="trendline-checklist.html">체크리스트 보기</a>
+        <a class="link-chip" href="trendline-journal.html">저널 템플릿 현재 페이지</a>
+      </div>
+
+      <span class="badge">HJ Trendline Journal Tool</span>
+      <h1>HJ 추세선 거래 저널 템플릿 v1</h1>
+      <p class="hero-lead">이 페이지는 HJ 추세선 전략의 거래 후 복기, A+ 판정, fakeout 분석, 패스 기록을 남기기 위한 실전 저널 템플릿 도구임. 기준서 본문을 다시 읽는 공간이 아니라, 실제 거래와 패스 결정을 빠르게 복붙하고 누적 리뷰하기 위한 입력 도구 중심 페이지다.</p>
+
+      <div class="hero-meta">
+        <div class="tip-card">
+          <h3>이 페이지의 역할</h3>
+          <p class="meta-text">실전 거래 결과, 패스 사유, 반복 실수를 같은 구조로 남겨 다음 트레이드 품질을 끌어올리는 기록용 문서.</p>
+        </div>
+        <div class="tip-card">
+          <h3>기록 핵심</h3>
+          <p class="meta-text">A+ 여부, fakeout 필터 적용, 리스크 품질, 늦은 진입 여부를 빠짐없이 체크하는 데 초점.</p>
+        </div>
+        <div class="tip-card">
+          <h3>사용 환경</h3>
+          <p class="meta-text">모바일 메모앱, 노션, 문서, 프린트, 캡처 어디에 붙여도 읽기 쉬운 다크 문서형 레이아웃.</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>기준서 / 체크리스트 / 저널 역할 구분</h2>
+          <p class="section-intro">세 페이지는 중복 설명이 아니라 서로 다른 단계에서 사용하도록 분리했다.</p>
+        </div>
+        <span class="badge">3-Page Workflow</span>
+      </div>
+      <div class="role-grid">
+        <article class="role-box">
+          <h3>기준서 페이지</h3>
+          <p class="meta-text">전략 철학, 운영 원칙, 리스크 기준, setup 해석 기준을 읽고 기준점을 맞추는 페이지.</p>
+        </article>
+        <article class="role-box">
+          <h3>체크리스트 페이지</h3>
+          <p class="meta-text">진입 전 체크박스로 A+ 조건, 패스 조건, 위험 신호를 실시간으로 확인하는 페이지.</p>
+        </article>
+        <article class="role-box">
+          <h3>저널 페이지</h3>
+          <p class="meta-text">거래 후 복기와 패스 로그를 남기고, 반복 실수와 fakeout 패턴을 누적 분석하는 페이지.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>사용 방법 요약</h2>
+          <p class="section-intro">복붙 속도와 사후 리뷰 효율을 우선한 실전 사용 흐름.</p>
+        </div>
+        <span class="badge">How to Use</span>
+      </div>
+      <div class="usage-grid">
+        <article class="tip-card">
+          <h3>1. 거래 직후 바로 복붙</h3>
+          <p class="meta-text">실전 거래 기록 템플릿을 복붙한 뒤 기본 정보 → 셋업 → 진입 → 청산 → 평가 순서로 채운다.</p>
+        </article>
+        <article class="tip-card">
+          <h3>2. 패스도 동일하게 기록</h3>
+          <p class="meta-text">진입하지 않은 차트도 패스 기록 템플릿으로 남겨 A+ 미달 상황을 학습 데이터로 만든다.</p>
+        </article>
+        <article class="tip-card">
+          <h3>3. 주간 리뷰에서 재사용</h3>
+          <p class="meta-text">아래 리뷰 질문, 반복 실수 체크, 판정 기준 요약을 이용해 거래 품질을 일관되게 평가한다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>실전 거래 기록 템플릿</h2>
+          <p class="section-intro">체결된 거래를 남기는 복붙용 템플릿. 카드 전체를 복사해서 바로 사용할 수 있다.</p>
+        </div>
+        <span class="rating-badge a-plus">복붙용 템플릿</span>
+      </div>
+
+      <article class="template-card trade">
+        <div class="template-meta">
+          <div>
+            <h3>권장 사용 시점</h3>
+            <p class="meta-text">거래 종료 직후 3분 이내 1차 기록 → 하루 마감 전 2차 평가 업데이트.</p>
+          </div>
+          <div>
+            <h3>핵심 기록 포인트</h3>
+            <p class="meta-text">A+ 판정, fakeout 여부, 늦은 진입, 리스크 품질, 규칙 준수 여부를 반드시 채운다.</p>
+          </div>
+        </div>
+
+        <div class="copy-toolbar">
+          <span class="copy-chip">복붙용 템플릿</span>
+          <span class="copy-chip">거래 종료 후 기록</span>
+        </div>
+
+        <div class="template-block">
+          <div class="template-header">
+            <strong>실전 거래 기록 템플릿</strong>
+            <span class="tag">실행 거래 전용</span>
+          </div>
+<pre>[HJ 추세선 거래 기록]
+
+[기본 정보]
+- 날짜:
+- 종목:
+- 시장:
+- 실행봉:
+- 상위봉 기준 방향:
+- 세션 시간:
+
+[셋업 정보]
+- 셋업 종류: 3터치 브레이크 / 리테스트 / 바운스 / 기타
+- 터치 수:
+- 데이터 기간:
+- 수평 레벨 확인 여부:
+- 종가 확인 여부:
+- retest 여부:
+- fakeout 필터 적용 여부:
+
+[진입 정보]
+- 진입 방향:
+- 진입가:
+- 손절가:
+- Safety line 위치:
+- 포지션 크기:
+- 1회 허용 손실 금액:
+- 실제 리스크 금액:
+- 저위험 / 고위험 판정:
+- 늦은 진입 여부:
+
+[청산 정보]
+- 청산가:
+- 청산 방식: 추세선 붕괴 / 수평 레벨 / 수동 청산 / 기타
+- 손익:
+- R multiple:
+- 보유 시간:
+
+[평가]
+- 최종 판정: A+ / A / B / mediocre / 패스했어야 함
+- 규칙 준수 여부:
+- 가장 잘한 점:
+- 가장 아쉬운 점:
+- 다음엔 무엇을 수정할지:
+- fakeout 여부:
+- 복수매매 충동 여부:
+- PnL 집착 여부:</pre>
+        </div>
+
+        <div class="inline-checks">
+          <div class="tip-card">
+            <h3>빠른 마감 체크</h3>
+            <ul class="check-list">
+              <li><span class="box-check"></span><div>A+ 여부를 결과가 아니라 진입 당시 품질 기준으로 판정했는가</div></li>
+              <li><span class="box-check"></span><div>fakeout 가능성을 사후합리화가 아니라 사전 필터 적용 여부로 기록했는가</div></li>
+              <li><span class="box-check"></span><div>리스크 금액과 실제 행동이 일치했는가</div></li>
+            </ul>
+          </div>
+          <div class="tip-card">
+            <h3>입력 팁</h3>
+            <ul class="simple-list">
+              <li><span class="dot"></span><div>세션 시간은 예: 런던 초반 / 뉴욕 오픈 1시간 / 아시아 후반처럼 구체적으로 적는다.</div></li>
+              <li><span class="dot"></span><div>청산 방식은 규칙 청산인지 감정 청산인지 구분되도록 짧게 보충 메모를 남긴다.</div></li>
+              <li><span class="dot"></span><div>평가 항목은 최소 한 줄씩 작성해 다음 거래 수정 포인트가 남도록 한다.</div></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>패스 기록 템플릿</h2>
+          <p class="section-intro">진입하지 않은 차트도 남겨야 A+가 아닌 상황과 fakeout 회피 능력이 쌓인다.</p>
+        </div>
+        <span class="rating-badge b">패스 로그</span>
+      </div>
+
+      <article class="template-card pass">
+        <div class="copy-toolbar">
+          <span class="copy-chip">복붙용 템플릿</span>
+          <span class="copy-chip">패스 결정 기록</span>
+        </div>
+        <div class="template-block">
+          <div class="template-header">
+            <strong>패스 기록 템플릿</strong>
+            <span class="tag">미진입 로그 전용</span>
+          </div>
+<pre>[HJ 추세선 패스 기록]
+
+- 날짜:
+- 종목:
+- 실행봉:
+- 왜 관심이 갔는가:
+- 왜 패스했는가: 늦은 진입 / 손절 과대 / 뉴스 위험 / 세션 나쁨 / 횡보 중심부 / 수평 레벨 충돌 / fakeout 가능성 큼 / A+ 미달
+- 패스 후 실제로 어떻게 움직였는가:
+- 패스 판단이 맞았는가:</pre>
+        </div>
+
+        <div class="divider"></div>
+        <div class="inline-checks">
+          <div class="tip-card">
+            <h3>패스 기록 핵심</h3>
+            <ul class="check-list">
+              <li><span class="box-check"></span><div>왜 관심이 갔는지 먼저 적어 setup 인식 능력을 남긴다</div></li>
+              <li><span class="box-check"></span><div>왜 패스했는지 구체적인 규칙 언어로 적어 판단 근거를 남긴다</div></li>
+              <li><span class="box-check"></span><div>패스 후 움직임까지 기록해 패스 품질을 검증한다</div></li>
+            </ul>
+          </div>
+          <div class="tip-card">
+            <h3>패스 사유 예시</h3>
+            <p class="meta-text">늦은 진입, 손절 과대, 뉴스 위험, 세션 나쁨, 횡보 중심부, 수평 레벨 충돌, fakeout 가능성 큼, A+ 미달 사유를 하나 이상 선택하고 구체 메모를 덧붙인다.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>리뷰 질문 섹션</h2>
+          <p class="section-intro">거래 결과가 아니라 setup 품질과 의사결정 품질을 되묻는 질문들.</p>
+        </div>
+        <span class="badge">Review Prompts</span>
+      </div>
+      <div class="review-grid">
+        <article class="question-card"><h3>Q1</h3><p>이 거래는 정말 A+였는가</p></article>
+        <article class="question-card"><h3>Q2</h3><p>브레이크 질은 충분했는가</p></article>
+        <article class="question-card"><h3>Q3</h3><p>fakeout 필터를 제대로 적용했는가</p></article>
+        <article class="question-card"><h3>Q4</h3><p>리스크는 적절했는가</p></article>
+        <article class="question-card"><h3>Q5</h3><p>늦은 진입이었는가</p></article>
+        <article class="question-card"><h3>Q6</h3><p>패스했어야 하는 거래는 아니었는가</p></article>
+        <article class="question-card"><h3>Q7</h3><p>다시 같은 상황이 오면 똑같이 할 것인가</p></article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>자주 반복되는 실수 체크 섹션</h2>
+          <p class="section-intro">체크박스 형태로 빠르게 훑어보며 반복 패턴을 누적 기록한다.</p>
+        </div>
+        <span class="badge">Mistake Check</span>
+      </div>
+      <div class="mistake-grid">
+        <article class="mistake-card">
+          <ul class="check-list">
+            <li><span class="box-check"></span><div>윅만 보고 진입</div></li>
+            <li><span class="box-check"></span><div>종가 확인 없이 진입</div></li>
+            <li><span class="box-check"></span><div>retest 없이 조급하게 진입</div></li>
+            <li><span class="box-check"></span><div>늦은 진입</div></li>
+            <li><span class="box-check"></span><div>과한 사이즈</div></li>
+          </ul>
+        </article>
+        <article class="mistake-card">
+          <ul class="check-list">
+            <li><span class="box-check"></span><div>mediocre setup 진입</div></li>
+            <li><span class="box-check"></span><div>뉴스/비활성 시간대 진입</div></li>
+            <li><span class="box-check"></span><div>PnL 집착</div></li>
+            <li><span class="box-check"></span><div>revenge trade</div></li>
+            <li><span class="box-check"></span><div>손절 무시</div></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <h2>A+ / A / B / mediocre / 패스했어야 함 판정 기준 요약</h2>
+          <p class="section-intro">상세 기준은 운영 기준서와 체크리스트를 따르되, 저널에서는 아래 요약 문구로 일관되게 점수화한다.</p>
+        </div>
+        <span class="badge">Rating Guide</span>
+      </div>
+      <div class="rating-grid">
+        <article class="rating-card">
+          <span class="rating-badge a-plus">A+</span>
+          <p class="meta-text">모든 핵심 조건이 정렬되고 브레이크 질, retest, 리스크, 타이밍이 매우 우수한 거래. 다시 와도 그대로 실행할 만한 수준.</p>
+        </article>
+        <article class="rating-card">
+          <span class="rating-badge a">A</span>
+          <p class="meta-text">전반적으로 좋고 규칙도 지켰지만 일부 요소가 A+만큼 선명하지 않은 거래. 충분히 실행 가능하나 개선 포인트가 남는다.</p>
+        </article>
+        <article class="rating-card">
+          <span class="rating-badge b">B</span>
+          <p class="meta-text">구조는 있었지만 한두 요소가 애매했던 거래. 결과와 무관하게 다음에는 더 선별해야 하는 수준.</p>
+        </article>
+        <article class="rating-card">
+          <span class="rating-badge mediocre">mediocre</span>
+          <p class="meta-text">setup 질이 평범하거나 확신 근거가 부족했던 거래. 실행보다 패스가 더 적절했을 가능성이 높다.</p>
+        </article>
+        <article class="rating-card">
+          <span class="rating-badge pass">패스했어야 함</span>
+          <p class="meta-text">늦은 진입, 과도한 손절, fakeout 위험, 세션 문제, 뉴스 위험 등으로 규칙상 거르면 좋았던 거래.</p>
+        </article>
+      </div>
+
+      <div class="footer-note">기준서는 원칙을 정하고, 체크리스트는 진입 전 품질을 거르고, 저널은 실제 행동과 패스 결정을 축적해 다음 거래의 기준 품질을 높인다.</div>
+    </section>
+  </div>
+</body>
+</html>
