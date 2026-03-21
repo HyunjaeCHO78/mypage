@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HJ 추세선 거래 체크리스트 v1</title>
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-soft: #0f172a;
+      --panel: rgba(15, 23, 42, 0.92);
+      --panel-strong: rgba(17, 24, 39, 0.98);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.18);
+      --a-plus: #22c55e;
+      --pass: #f87171;
+      --caution: #f59e0b;
+      --primary: #38bdf8;
+      --shadow: 0 18px 44px rgba(2, 6, 23, 0.38);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #020617 0%, #0b1120 28%, #111827 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .hero,
+    .section,
+    .callout,
+    .summary-card,
+    .score-box,
+    .pass-box {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.15), transparent 34%),
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.1), transparent 24%),
+        var(--panel);
+    }
+
+    .top-links,
+    .hero-meta,
+    .badge-row,
+    .summary-grid,
+    .section-grid,
+    .quick-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .top-links {
+      grid-template-columns: repeat(2, minmax(0, max-content));
+      justify-content: start;
+    }
+
+    .hero-meta,
+    .summary-grid,
+    .quick-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .section-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .link-chip,
+    .badge,
+    .status-badge,
+    .score-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .link-chip {
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: rgba(56, 189, 248, 0.12);
+      color: #bae6fd;
+    }
+
+    .badge {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.78);
+      color: #cbd5e1;
+    }
+
+    .status-badge.a-plus {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      color: #bbf7d0;
+    }
+
+    .status-badge.pass {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      color: #fecaca;
+    }
+
+    .status-badge.caution {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.18;
+    }
+
+    h2 {
+      font-size: clamp(1.3rem, 2vw, 1.8rem);
+      line-height: 1.3;
+    }
+
+    .muted,
+    .section-intro,
+    .meta-text,
+    .small-note {
+      color: var(--muted);
+    }
+
+    .hero-lead {
+      max-width: 72ch;
+      font-size: 1.02rem;
+      color: #dbe4f0;
+    }
+
+    .summary-card,
+    .quick-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(17, 24, 39, 0.84);
+    }
+
+    .summary-card strong,
+    .quick-card strong { display: block; margin-bottom: 8px; }
+
+    .section {
+      margin-top: 24px;
+      padding: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .section-card h3 { margin-bottom: 12px; }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 0;
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .checklist li:first-child { border-top: none; padding-top: 0; }
+    .checklist li:last-child { padding-bottom: 0; }
+
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      border-radius: 7px;
+      border: 2px solid rgba(148, 163, 184, 0.35);
+      background:
+        linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .callout-wrap,
+    .table-wrap {
+      display: grid;
+      gap: 18px;
+    }
+
+    .table-wrap {
+      grid-template-columns: 1.2fr 0.8fr;
+      margin-top: 24px;
+    }
+
+    .score-box,
+    .pass-box,
+    .callout {
+      padding: 22px;
+      background: rgba(17, 24, 39, 0.94);
+    }
+
+    .score-box { border-top: 4px solid var(--a-plus); }
+    .pass-box { border-top: 4px solid var(--pass); }
+    .callout { border-top: 4px solid var(--primary); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.82);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(30, 41, 59, 0.95);
+      color: #c7eafe;
+      font-size: 14px;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .score-pill {
+      margin-top: 12px;
+      margin-right: 8px;
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.82);
+      color: #dbe4f0;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.16);
+      color: #dff4ff;
+      font-weight: 700;
+    }
+
+    @media print {
+      body {
+        background: #0b1120;
+      }
+
+      .page {
+        width: 100%;
+        padding: 0;
+      }
+
+      .hero,
+      .section,
+      .callout,
+      .summary-card,
+      .score-box,
+      .pass-box {
+        box-shadow: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        width: min(100% - 20px, 1000px);
+        padding-top: 20px;
+      }
+
+      .hero,
+      .section,
+      .score-box,
+      .pass-box,
+      .callout {
+        padding: 18px;
+      }
+
+      .hero-meta,
+      .summary-grid,
+      .section-grid,
+      .quick-grid,
+      .table-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .section-header {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="top-links">
+        <a class="link-chip" href="index.html">기준서 본문 페이지</a>
+        <span class="badge">실전 진입 전 체크리스트 도구</span>
+      </div>
+      <div class="badge-row">
+        <span class="status-badge a-plus">A+ 선별 전용</span>
+        <span class="status-badge caution">실행 전 점검</span>
+        <span class="status-badge pass">패스 기준 포함</span>
+      </div>
+      <div>
+        <h1>HJ 추세선 거래 체크리스트 v1</h1>
+        <p class="hero-lead">
+          이 페이지는 HJ 추세선 전략의 A+ 셋업만 선별하기 위한 실전 체크리스트 도구임.
+          기준서 본문을 다시 읽는 용도가 아니라, 실제 매매 직전에 구조·리스크·진입 품질을 빠르게 검증하는 데 목적이 있다.
+        </p>
+      </div>
+      <div class="hero-meta">
+        <div class="summary-card">
+          <strong>핵심 목적</strong>
+          <p class="meta-text">브레이크가 보여도 mediocre setup은 제거하고, 실제로 실행할 수 있는 A+ 셋업만 남긴다.</p>
+        </div>
+        <div class="summary-card">
+          <strong>운영 방식</strong>
+          <p class="meta-text">시장 환경 → 구조 → 브레이크 질 → 리스크 → 진입 → 보유/청산 순서로 빠짐없이 점검한다.</p>
+        </div>
+        <div class="summary-card">
+          <strong>문서 관계</strong>
+          <p class="meta-text">이 페이지는 실행 전 점검용이며, 기준서 본문은 별도 페이지에서 관리한다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <span class="badge">사용 흐름</span>
+          <h2>실전 진입 전 체크리스트</h2>
+          <p class="section-intro">위에서 아래로 순서대로 확인하고, 하나라도 강한 패스 조건이 보이면 점수 계산 전에 거래를 중단한다.</p>
+        </div>
+        <div class="quick-grid">
+          <div class="quick-card"><strong>1단계</strong><p class="small-note">시장과 상위 구조 필터</p></div>
+          <div class="quick-card"><strong>2단계</strong><p class="small-note">추세선과 브레이크 질 검증</p></div>
+          <div class="quick-card"><strong>3단계</strong><p class="small-note">리스크·진입·청산 계획 확정</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <span class="badge">시장 필터</span>
+          <h2>시장 환경 체크</h2>
+        </div>
+        <span class="status-badge caution">주의 구간 먼저 제거</span>
+      </div>
+      <div class="section-card">
+        <ul class="checklist">
+          <li><span class="checkbox" aria-hidden="true"></span><span>오늘 거래 종목이 핵심 감시 종목인가</span></li>
+          <li><span class="checkbox" aria-hidden="true"></span><span>뉴스/이벤트/고변동 시간대가 아닌가</span></li>
+          <li><span class="checkbox" aria-hidden="true"></span><span>세션 시간대가 적절한가</span></li>
+          <li><span class="checkbox" aria-hidden="true"></span><span>갭/계약전환/비정상 움직임이 없는가</span></li>
+          <li><span class="checkbox" aria-hidden="true"></span><span>횡보 중심부가 아닌가</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-grid">
+        <article class="section-card">
+          <span class="badge">상위 구조</span>
+          <h2>상위봉 구조 체크</h2>
+          <ul class="checklist">
+            <li><span class="checkbox" aria-hidden="true"></span><span>상위봉 방향이 명확한가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>상위봉과 정면 충돌하는 진입이 아닌가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>큰 수평 지지/저항이 바로 앞이 아닌가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>현재 위치가 추세 중간인지 극단 구간인지 확인했는가</span></li>
+          </ul>
+        </article>
+        <article class="section-card">
+          <span class="badge">선 구조</span>
+          <h2>추세선 구조 체크</h2>
+          <ul class="checklist">
+            <li><span class="checkbox" aria-hidden="true"></span><span>유효한 추세선을 찾았는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>추세선이 가격에 의해 중간 관통되지 않았는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>3터치가 확인되는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>Point B가 최신 유효 접점인가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>fan 구조로 더 가파른 선이 필요한지 확인했는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>의미 있는 데이터 기간이 쌓였는가</span></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-grid">
+        <article class="section-card">
+          <span class="badge">브레이크 검증</span>
+          <h2>브레이크 질 체크</h2>
+          <ul class="checklist">
+            <li><span class="checkbox" aria-hidden="true"></span><span>실제 브레이크가 발생했는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>윅만 찌른 게 아니라 종가 기준으로 확인됐는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>가능하면 break and retest가 나왔는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>추세선 브레이크와 함께 수평 레벨도 확인됐는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>fakeout 가능성이 높은 시간대/구간은 아닌가</span></li>
+          </ul>
+        </article>
+        <article class="section-card">
+          <span class="badge">리스크 관리</span>
+          <h2>리스크 체크</h2>
+          <ul class="checklist">
+            <li><span class="checkbox" aria-hidden="true"></span><span>Safety line이 명확한가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>손절 위치를 진입 전에 정했는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>손절까지 거리가 과도하지 않은가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>계좌 기준 1회 허용 손실 안에 들어오는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>사이즈 축소로 저위험화 가능한가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>그것도 안 되면 패스할 준비가 되었는가</span></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-grid">
+        <article class="section-card">
+          <span class="badge">트리거 확인</span>
+          <h2>진입 체크</h2>
+          <ul class="checklist">
+            <li><span class="checkbox" aria-hidden="true"></span><span>지금 진입이 늦은 진입은 아닌가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>FOMO 진입이 아닌가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>mediocre setup이 아닌가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>이 거래를 A+라고 말할 수 있는가</span></li>
+          </ul>
+        </article>
+        <article class="section-card">
+          <span class="badge">운영 계획</span>
+          <h2>보유/청산 체크</h2>
+          <ul class="checklist">
+            <li><span class="checkbox" aria-hidden="true"></span><span>청산 방식이 정해졌는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>추세선 붕괴 청산 / 수평 레벨 청산 / 혼합형 중 무엇인지 정했는가</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>짧은 시간대라면 더 빠른 이익 보호 계획이 있는가</span></li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="table-wrap">
+        <div class="score-box">
+          <span class="status-badge a-plus">A+ 점수표 요약</span>
+          <h2 style="margin-top: 12px;">점수 체계로 mediocre setup 제거</h2>
+          <table style="margin-top: 16px;">
+            <thead>
+              <tr>
+                <th>점수 구간</th>
+                <th>등급</th>
+                <th>판단</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>85점 이상</td>
+                <td>A+</td>
+                <td>실행 우선 검토 대상</td>
+              </tr>
+              <tr>
+                <td>70~84점</td>
+                <td>A</td>
+                <td>조건 보강이 없으면 보수적으로 판단</td>
+              </tr>
+              <tr>
+                <td>55~69점</td>
+                <td>B</td>
+                <td>관찰/복기용으로 남기고 실전은 신중</td>
+              </tr>
+              <tr>
+                <td>54점 이하</td>
+                <td>패스</td>
+                <td>즉시 제외</td>
+              </tr>
+            </tbody>
+          </table>
+          <div>
+            <span class="score-pill">A+ = 실행 가능</span>
+            <span class="score-pill">A = 보강 필요</span>
+            <span class="score-pill">B = 관찰 우선</span>
+            <span class="score-pill">Pass = 거래 금지</span>
+          </div>
+        </div>
+
+        <div class="callout-wrap">
+          <aside class="pass-box">
+            <span class="status-badge pass">패스 조건 요약</span>
+            <ul class="checklist" style="margin-top: 14px;">
+              <li><span class="checkbox" aria-hidden="true"></span><span>뉴스·이벤트·비정상 시간대로 fakeout 가능성이 높다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>상위봉과 정면 충돌하거나 큰 수평 레벨이 바로 앞이다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>3터치·종가 확인·Safety line 등 핵심 조건이 비어 있다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>손절이 과도하고 사이즈 축소 후에도 허용 손실을 넘는다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>늦은 진입, FOMO, mediocre setup 느낌이 강하다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>최종 점수가 54점 이하다</span></li>
+            </ul>
+          </aside>
+          <aside class="callout">
+            <span class="status-badge caution">사용 방법 요약</span>
+            <ul class="checklist" style="margin-top: 14px;">
+              <li><span class="checkbox" aria-hidden="true"></span><span>체크는 반드시 시장 환경부터 시작하고, 순서를 건너뛰지 않는다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>강한 패스 조건이 나오면 점수 계산 없이 종료한다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>모든 체크가 끝난 뒤 A+ 점수와 청산 계획을 함께 확정한다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>캡처·복붙·인쇄용으로 그대로 사용하고, 본문 해설은 기준서 페이지에서만 확인한다</span></li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        이 페이지는 실행 전 점검용이며, 기준서 본문은 별도 페이지에서 관리한다. 실전에서는 체크리스트로 선별하고,
+        세부 해설과 원칙은 기존 기준서 페이지에서 참고한다.
+      </div>
+    </section>
+  </main>
+</body>
+</html>
