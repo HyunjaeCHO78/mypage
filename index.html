@@ -89,6 +89,7 @@
 
     .hero-grid,
     .grid-2,
+    .top-links,
     .grid-3,
     .score-grid,
     .journal-grid,
@@ -100,6 +101,11 @@
     .hero-grid,
     .grid-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .top-links {
+      grid-template-columns: repeat(2, minmax(0, max-content));
+      justify-content: start;
     }
 
     .grid-3,
@@ -271,6 +277,10 @@
             <li><strong>One hour a day</strong>: 매일 최소 1시간 리뷰·관찰·복기</li>
           </ul>
         </div>
+      </div>
+      <div class="top-links" style="margin-top: 4px;">
+        <a class="pill" href="trendline-checklist.html">체크리스트 전용 페이지 열기</a>
+        <span class="pill">기준서 본문은 그대로 유지</span>
       </div>
       <div class="pill-list">
         <span class="pill">단순성 우선</span>
