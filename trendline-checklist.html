@@ -224,14 +224,27 @@
     }
 
     .callout-wrap,
-    .table-wrap {
+    .table-wrap,
+    .gate-grid,
+    .judgment-grid {
       display: grid;
       gap: 18px;
     }
 
-    .table-wrap {
-      grid-template-columns: 1.2fr 0.8fr;
+    .gate-grid {
+      grid-template-columns: 1.1fr 0.9fr;
       margin-top: 24px;
+    }
+
+    .table-wrap {
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      margin-top: 24px;
+      align-items: start;
+    }
+
+    .judgment-grid {
+      margin-top: 18px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .score-box,
@@ -244,6 +257,22 @@
     .score-box { border-top: 4px solid var(--a-plus); }
     .pass-box { border-top: 4px solid var(--pass); }
     .callout { border-top: 4px solid var(--primary); }
+
+    .gate-box {
+      border-top: 4px solid var(--caution);
+    }
+
+    .judgment-card {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.78);
+    }
+
+    .judgment-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
 
     table {
       width: 100%;
@@ -286,6 +315,12 @@
       font-weight: 700;
     }
 
+    .table-note {
+      margin-top: 14px;
+      font-size: 0.94rem;
+      color: #dbe4f0;
+    }
+
     @media print {
       body {
         background: #0b1120;
@@ -324,7 +359,9 @@
       .summary-grid,
       .section-grid,
       .quick-grid,
-      .table-wrap {
+      .table-wrap,
+      .gate-grid,
+      .judgment-grid {
         grid-template-columns: 1fr;
       }
 
@@ -374,13 +411,37 @@
         <div>
           <span class="badge">사용 흐름</span>
           <h2>실전 진입 전 체크리스트</h2>
-          <p class="section-intro">위에서 아래로 순서대로 확인하고, 하나라도 강한 패스 조건이 보이면 점수 계산 전에 거래를 중단한다.</p>
+          <p class="section-intro">먼저 필수 게이트를 통과시키고, 통과한 셋업만 100점 루브릭으로 채점해 A+ / A / B / Pass를 구분한다.</p>
         </div>
         <div class="quick-grid">
-          <div class="quick-card"><strong>1단계</strong><p class="small-note">시장과 상위 구조 필터</p></div>
-          <div class="quick-card"><strong>2단계</strong><p class="small-note">추세선과 브레이크 질 검증</p></div>
-          <div class="quick-card"><strong>3단계</strong><p class="small-note">리스크·진입·청산 계획 확정</p></div>
+          <div class="quick-card"><strong>1단계</strong><p class="small-note">필수 게이트부터 확인</p></div>
+          <div class="quick-card"><strong>2단계</strong><p class="small-note">통과 시 100점 루브릭 채점</p></div>
+          <div class="quick-card"><strong>3단계</strong><p class="small-note">총점으로 등급 판정 후 Pass는 진입 금지</p></div>
         </div>
+      </div>
+
+      <div class="gate-grid">
+        <aside class="callout gate-box">
+          <span class="status-badge caution">필수 게이트</span>
+          <h2 style="margin-top: 12px;">점수보다 먼저 통과해야 하는 진입 금지 규칙</h2>
+          <ul class="checklist" style="margin-top: 14px;">
+            <li><span class="checkbox" aria-hidden="true"></span><span>윅만 찌른 브레이크는 진입 금지</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>종가 기준 브레이크 확인 전 진입 금지</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>Safety line이 불명확하면 진입 금지</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>손절 감당 불가면 진입 금지</span></li>
+          </ul>
+          <p class="table-note">A+는 단순 점수 합산으로 결정되지 않는다. 반드시 필수 게이트를 먼저 통과해야 하며, 총점이 높아도 게이트를 통과하지 못하면 A+로 간주하지 않는다.</p>
+        </aside>
+
+        <aside class="score-box">
+          <span class="status-badge a-plus">사용 방법 요약</span>
+          <ul class="checklist" style="margin-top: 14px;">
+            <li><span class="checkbox" aria-hidden="true"></span><span>1. 필수 게이트 먼저 확인</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>2. 통과하면 각 항목 점수 계산</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>3. 총점으로 A+ / A / B / Pass 판정</span></li>
+            <li><span class="checkbox" aria-hidden="true"></span><span>4. Pass면 진입하지 않음</span></li>
+          </ul>
+        </aside>
       </div>
     </section>
 
@@ -483,66 +544,107 @@
 
       <div class="table-wrap">
         <div class="score-box">
-          <span class="status-badge a-plus">A+ 점수표 요약</span>
-          <h2 style="margin-top: 12px;">점수 체계로 mediocre setup 제거</h2>
+          <span class="status-badge a-plus">100점 루브릭</span>
+          <h2 style="margin-top: 12px;">체크리스트 페이지 단독 판정을 위한 세부 점수표</h2>
           <table style="margin-top: 16px;">
             <thead>
               <tr>
-                <th>점수 구간</th>
-                <th>등급</th>
-                <th>판단</th>
+                <th>구분</th>
+                <th>항목</th>
+                <th>점수</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>85점 이상</td>
-                <td>A+</td>
-                <td>실행 우선 검토 대상</td>
+                <td>필수 점수</td>
+                <td>3터치 유효 추세선</td>
+                <td>20점</td>
               </tr>
               <tr>
-                <td>70~84점</td>
-                <td>A</td>
-                <td>조건 보강이 없으면 보수적으로 판단</td>
+                <td>필수 점수</td>
+                <td>실제 브레이크</td>
+                <td>15점</td>
               </tr>
               <tr>
-                <td>55~69점</td>
-                <td>B</td>
-                <td>관찰/복기용으로 남기고 실전은 신중</td>
+                <td>필수 점수</td>
+                <td>Safety line 존재</td>
+                <td>15점</td>
               </tr>
               <tr>
-                <td>54점 이하</td>
-                <td>패스</td>
-                <td>즉시 제외</td>
+                <td>필수 점수</td>
+                <td>손절 감당 가능</td>
+                <td>15점</td>
+              </tr>
+              <tr>
+                <td>품질 점수</td>
+                <td>상위봉 정렬</td>
+                <td>10점</td>
+              </tr>
+              <tr>
+                <td>품질 점수</td>
+                <td>데이터 기간 충분</td>
+                <td>10점</td>
+              </tr>
+              <tr>
+                <td>품질 점수</td>
+                <td>종가 확인</td>
+                <td>5점</td>
+              </tr>
+              <tr>
+                <td>품질 점수</td>
+                <td>break and retest</td>
+                <td>5점</td>
+              </tr>
+              <tr>
+                <td>품질 점수</td>
+                <td>수평 레벨 동시 확인</td>
+                <td>3점</td>
+              </tr>
+              <tr>
+                <td>품질 점수</td>
+                <td>세션 양호</td>
+                <td>2점</td>
               </tr>
             </tbody>
           </table>
+          <p class="table-note">종가 확인은 루브릭에서 5점으로 남아 있지만, 문서상으로는 동시에 필수 게이트다. 즉, 종가 기준 브레이크 확인이 없으면 진입 자체를 금지하고, 통과한 셋업끼리만 추가 5점 반영으로 84점과 85점 차이를 판별한다.</p>
           <div>
-            <span class="score-pill">A+ = 실행 가능</span>
-            <span class="score-pill">A = 보강 필요</span>
-            <span class="score-pill">B = 관찰 우선</span>
-            <span class="score-pill">Pass = 거래 금지</span>
+            <span class="score-pill">A+는 게이트 통과 후 85점 이상</span>
+            <span class="score-pill">A는 70~84점</span>
+            <span class="score-pill">B는 55~69점</span>
+            <span class="score-pill">Pass는 54점 이하</span>
           </div>
         </div>
 
         <div class="callout-wrap">
+          <aside class="callout">
+            <span class="status-badge caution">판정 구간</span>
+            <div class="judgment-grid" style="margin-top: 14px;">
+              <div class="judgment-card"><strong>85점 이상</strong><p class="small-note">A+ · 필수 게이트를 먼저 통과한 셋업만 해당</p></div>
+              <div class="judgment-card"><strong>70~84점</strong><p class="small-note">A · 실행 후보지만 보강 조건 확인 필요</p></div>
+              <div class="judgment-card"><strong>55~69점</strong><p class="small-note">B · 관찰/복기 중심으로 관리</p></div>
+              <div class="judgment-card"><strong>54점 이하</strong><p class="small-note">Pass · 진입하지 않음</p></div>
+            </div>
+            <p class="table-note">84점과 85점의 차이는 A+ 여부를 가르는 기준선이다. 필수 게이트를 모두 통과한 뒤 총점이 85점 이상이면 A+, 84점이면 A로 남긴다.</p>
+          </aside>
           <aside class="pass-box">
             <span class="status-badge pass">패스 조건 요약</span>
             <ul class="checklist" style="margin-top: 14px;">
               <li><span class="checkbox" aria-hidden="true"></span><span>뉴스·이벤트·비정상 시간대로 fakeout 가능성이 높다</span></li>
               <li><span class="checkbox" aria-hidden="true"></span><span>상위봉과 정면 충돌하거나 큰 수평 레벨이 바로 앞이다</span></li>
-              <li><span class="checkbox" aria-hidden="true"></span><span>3터치·종가 확인·Safety line 등 핵심 조건이 비어 있다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>종가 기준 브레이크, Safety line, 손절 감당 가능 여부 중 하나라도 비어 있다</span></li>
               <li><span class="checkbox" aria-hidden="true"></span><span>손절이 과도하고 사이즈 축소 후에도 허용 손실을 넘는다</span></li>
               <li><span class="checkbox" aria-hidden="true"></span><span>늦은 진입, FOMO, mediocre setup 느낌이 강하다</span></li>
-              <li><span class="checkbox" aria-hidden="true"></span><span>최종 점수가 54점 이하다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>필수 게이트 통과 후 최종 점수가 54점 이하다</span></li>
             </ul>
           </aside>
           <aside class="callout">
-            <span class="status-badge caution">사용 방법 요약</span>
+            <span class="status-badge caution">A+ 판정 메모</span>
             <ul class="checklist" style="margin-top: 14px;">
-              <li><span class="checkbox" aria-hidden="true"></span><span>체크는 반드시 시장 환경부터 시작하고, 순서를 건너뛰지 않는다</span></li>
-              <li><span class="checkbox" aria-hidden="true"></span><span>강한 패스 조건이 나오면 점수 계산 없이 종료한다</span></li>
-              <li><span class="checkbox" aria-hidden="true"></span><span>모든 체크가 끝난 뒤 A+ 점수와 청산 계획을 함께 확정한다</span></li>
-              <li><span class="checkbox" aria-hidden="true"></span><span>캡처·복붙·인쇄용으로 그대로 사용하고, 본문 해설은 기준서 페이지에서만 확인한다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>A+는 단순 점수 합산만으로 결정되지 않는다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>필수 게이트를 먼저 통과해야 한다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>게이트 통과 후 점수표로 A+ / A / B / Pass를 판정한다</span></li>
+              <li><span class="checkbox" aria-hidden="true"></span><span>종가 확인은 진입 허용 여부를 가르는 게이트이면서, 통과 셋업 간 품질 점수 5점도 반영한다</span></li>
             </ul>
           </aside>
         </div>
