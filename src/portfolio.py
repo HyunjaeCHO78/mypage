@@ -19,6 +19,7 @@ class Position:
     tranches: list[PositionTranche] = field(default_factory=list)
     reduction_count: int = 0
     warning_count: int = 0
+    planned_tranche_quantities: list[int] = field(default_factory=list)
 
     @property
     def quantity(self) -> int:
@@ -41,6 +42,14 @@ class Position:
     @property
     def next_tranche_index(self) -> int:
         return len(self.tranches) + 1
+
+    def set_tranche_plan(self, tranche_quantities: list[int]) -> None:
+        self.planned_tranche_quantities = list(tranche_quantities)
+
+    def planned_quantity_for(self, tranche_index: int) -> int:
+        if tranche_index <= 0 or tranche_index > len(self.planned_tranche_quantities):
+            return 0
+        return self.planned_tranche_quantities[tranche_index - 1]
 
     def add_tranche(self, tranche: PositionTranche) -> None:
         self.tranches.append(tranche)
