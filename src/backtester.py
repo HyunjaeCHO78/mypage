@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from src.indicators import add_indicators
 from src.portfolio import Portfolio, Position, PositionTranche
@@ -19,7 +20,6 @@ class BacktestResult:
     metrics: dict[str, float]
 
 
-
 def _compute_max_consecutive_losses(closed_trades: list[dict]) -> int:
     max_streak = 0
     current = 0
@@ -31,6 +31,22 @@ def _compute_max_consecutive_losses(closed_trades: list[dict]) -> int:
             current = 0
     return max_streak
 
+
+def _compute_trade_stats(closed_trades: list[dict[str, Any]]) -> dict[str, Any]:
+    wins = [trade for trade in closed_trades if trade["pnl"] > 0]
+    losses = [trade for trade in closed_trades if trade["pnl"] < 0]
+    gross_profit = sum(trade["pnl"] for trade in wins)
+    gross_loss = abs(sum(trade["pnl"] for trade in losses))
+    returns = [trade.get("return_pct", 0.0) for trade in closed_trades]
+    return {
+        "closed_trades": len(closed_trades),
+        "win_rate": round(len(wins) / len(closed_trades), 4) if closed_trades else 0.0,
+        "profit_factor": round(gross_profit / gross_loss, 4) if gross_loss > 0 else ("inf" if gross_profit > 0 else 0.0),
+        "average_return": round(sum(returns) / len(returns), 4) if returns else 0.0,
+        "max_consecutive_loss": _compute_max_consecutive_losses(closed_trades),
+        "gross_profit": round(gross_profit, 2),
+        "gross_loss": round(gross_loss, 2),
+    }
 
 
 def _build_symbol_summary(trades: list[dict]) -> list[dict]:
@@ -44,10 +60,11 @@ def _build_symbol_summary(trades: list[dict]) -> list[dict]:
                 "buy_count": 0,
                 "sell_count": 0,
                 "realized_pnl": 0.0,
-                "avg_return": 0.0,
+                "average_return": 0.0,
                 "win_rate": 0.0,
                 "profit_factor": 0.0,
                 "closed_trades": 0,
+                "max_consecutive_loss": 0,
             },
         )
         if trade["action"] == "BUY":
@@ -55,21 +72,17 @@ def _build_symbol_summary(trades: list[dict]) -> list[dict]:
         elif trade["action"] == "SELL":
             bucket["sell_count"] += 1
             bucket["realized_pnl"] += trade["pnl"]
-            bucket["closed_trades"] += 1
 
     for symbol, bucket in summary.items():
         closed = [trade for trade in trades if trade["symbol"] == symbol and trade["action"] == "SELL"]
-        wins = [trade for trade in closed if trade["pnl"] > 0]
-        losses = [trade for trade in closed if trade["pnl"] < 0]
-        returns = [trade.get("return_pct", 0.0) for trade in closed]
-        bucket["avg_return"] = round(sum(returns) / len(returns), 4) if returns else 0.0
-        bucket["win_rate"] = round(len(wins) / len(closed), 4) if closed else 0.0
-        gross_profit = sum(trade["pnl"] for trade in wins)
-        gross_loss = abs(sum(trade["pnl"] for trade in losses))
-        bucket["profit_factor"] = round(gross_profit / gross_loss, 4) if gross_loss > 0 else ("inf" if gross_profit > 0 else 0.0)
+        stats = _compute_trade_stats(closed)
+        bucket["average_return"] = stats["average_return"]
+        bucket["win_rate"] = stats["win_rate"]
+        bucket["profit_factor"] = stats["profit_factor"]
+        bucket["closed_trades"] = stats["closed_trades"]
+        bucket["max_consecutive_loss"] = stats["max_consecutive_loss"]
         bucket["realized_pnl"] = round(bucket["realized_pnl"], 2)
     return sorted(summary.values(), key=lambda row: row["symbol"])
-
 
 
 def _compute_metrics(equity_curve: list[dict], trades: list[dict], initial_equity: float) -> dict[str, float]:
@@ -85,22 +98,16 @@ def _compute_metrics(equity_curve: list[dict], trades: list[dict], initial_equit
         drawdown = (point["equity"] - peak) / peak
         mdd = min(mdd, drawdown)
     closed = [trade for trade in trades if trade["action"] == "SELL"]
-    wins = [trade for trade in closed if trade["pnl"] > 0]
-    losses = [trade for trade in closed if trade["pnl"] < 0]
-    win_rate = len(wins) / len(closed) if closed else 0.0
-    gross_profit = sum(trade["pnl"] for trade in wins)
-    gross_loss = abs(sum(trade["pnl"] for trade in losses))
-    average_return = sum(trade.get("return_pct", 0.0) for trade in closed) / len(closed) if closed else 0.0
-    profit_factor = (gross_profit / gross_loss) if gross_loss > 0 else (float("inf") if gross_profit > 0 else 0.0)
+    stats = _compute_trade_stats(closed)
+    profit_factor = float("inf") if stats["profit_factor"] == "inf" else stats["profit_factor"]
     return {
         "cagr": cagr,
         "mdd": mdd,
-        "win_rate": win_rate,
+        "win_rate": stats["win_rate"],
         "profit_factor": profit_factor,
-        "average_return": average_return,
-        "max_consecutive_loss": _compute_max_consecutive_losses(closed),
+        "average_return": stats["average_return"],
+        "max_consecutive_loss": stats["max_consecutive_loss"],
     }
-
 
 
 def _entry_signal_name(row: dict, history: list[dict], idx: int, lookback: int) -> str | None:
@@ -111,7 +118,6 @@ def _entry_signal_name(row: dict, history: list[dict], idx: int, lookback: int) 
     if detect_pullback_signal(history, idx, lookback):
         return "pullback"
     return None
-
 
 
 def _sell_quantity(position: Position, quantity: int, price: float, reason: str, date, trades: list[dict], portfolio: Portfolio, symbol: str) -> None:
@@ -141,9 +147,20 @@ def _sell_quantity(position: Position, quantity: int, price: float, reason: str,
         portfolio.positions.pop(symbol, None)
 
 
+def _portfolio_metrics_rows(metrics: dict[str, float]) -> list[dict[str, float | str | int]]:
+    return [
+        {"metric": "cagr", "value": round(metrics["cagr"], 6)},
+        {"metric": "mdd", "value": round(metrics["mdd"], 6)},
+        {"metric": "win_rate", "value": round(metrics["win_rate"], 6)},
+        {"metric": "profit_factor", "value": metrics["profit_factor"] if metrics["profit_factor"] != float("inf") else "inf"},
+        {"metric": "average_return", "value": round(metrics["average_return"], 6)},
+        {"metric": "max_consecutive_loss", "value": metrics["max_consecutive_loss"]},
+    ]
+
 
 def run_backtest(rows: list[dict], config: dict, trades_output: str, equity_output: str) -> BacktestResult:
     defaults = config["defaults"]
+    allocation_plan = defaults["allocation_plan"]
     enriched = add_indicators(rows, config["strategy"]["ma_short"], config["strategy"]["ma_mid"], config["strategy"]["ma_long"], defaults["atr_period"])
     by_symbol = group_by_symbol(enriched)
     all_dates = sorted({row["date"] for row in enriched})
@@ -152,7 +169,9 @@ def run_backtest(rows: list[dict], config: dict, trades_output: str, equity_outp
     trades: list[dict] = []
     equity_curve: list[dict] = []
     latest_prices: dict[str, float] = {}
-    symbol_summary_output = str(Path(trades_output).with_name("backtest_symbol_summary.csv"))
+    trades_path = Path(trades_output)
+    symbol_summary_output = str(trades_path.with_name("backtest_symbol_summary.csv"))
+    portfolio_metrics_output = str(trades_path.with_name("backtest_portfolio_metrics.csv"))
 
     for date in all_dates:
         for row in daily_rows[date]:
@@ -168,11 +187,13 @@ def run_backtest(rows: list[dict], config: dict, trades_output: str, equity_outp
                 if reason == "warning":
                     position.warning_count += 1
                     logging.info("[%s] warning signal on %s: position held", symbol, date.strftime("%Y-%m-%d"))
-                elif should_exit and reason == "reduce" and position.quantity > 1:
-                    reduce_qty = max(1, position.quantity // 2)
+                elif should_exit and reason == "reduce":
+                    reduce_qty = max(1, round(position.quantity * 0.5))
                     position.reduction_count += 1
+                    logging.info("[%s] reduce signal on %s: selling %s of %s shares", symbol, date.strftime("%Y-%m-%d"), reduce_qty, position.quantity)
                     _sell_quantity(position, reduce_qty, row["close"], reason, date, trades, portfolio, symbol)
                 elif should_exit:
+                    logging.info("[%s] exit signal %s on %s: liquidating remaining %s shares", symbol, reason, date.strftime("%Y-%m-%d"), position.quantity)
                     _sell_quantity(position, position.quantity, row["close"], reason, date, trades, portfolio, symbol)
                     position = portfolio.positions.get(symbol)
 
@@ -182,17 +203,26 @@ def run_backtest(rows: list[dict], config: dict, trades_output: str, equity_outp
             if not portfolio.can_open_new_position(symbol):
                 continue
 
-            stop_price = row["low"] if row.get("atr") is None else max(row["low"], row["close"] - row["atr"] * defaults["atr_multiplier"])
-            sizing = calculate_position_size(portfolio.equity(latest_prices), row["close"], stop_price, defaults["risk_per_trade"], defaults["allocation_plan"])
-            target_position = position if position is not None else Position(symbol=symbol)
+            is_new_position = position is None
+            if is_new_position:
+                stop_price = row["low"] if row.get("atr") is None else max(row["low"], row["close"] - row["atr"] * defaults["atr_multiplier"])
+                sizing = calculate_position_size(portfolio.equity(latest_prices), row["close"], stop_price, defaults["risk_per_trade"], allocation_plan)
+                if sizing.quantity <= 0:
+                    continue
+                target_position = Position(symbol=symbol)
+                target_position.set_tranche_plan(sizing.tranche_quantities)
+            else:
+                target_position = position
+
             tranche_index = target_position.next_tranche_index
-            if tranche_index > len(defaults["allocation_plan"]):
+            if tranche_index > len(allocation_plan):
                 continue
-            tranche_qty = sizing.tranche_quantities[tranche_index - 1]
+            tranche_qty = target_position.planned_quantity_for(tranche_index)
             cost = row["close"] * tranche_qty
             if tranche_qty <= 0 or cost > portfolio.cash:
                 continue
-            if position is None:
+
+            if is_new_position:
                 portfolio.positions[symbol] = target_position
             portfolio.cash -= cost
             target_position.add_tranche(
@@ -223,5 +253,6 @@ def run_backtest(rows: list[dict], config: dict, trades_output: str, equity_outp
     symbol_summary = _build_symbol_summary(trades)
     save_rows(trades, trades_output, fieldnames=["date", "symbol", "action", "price", "quantity", "reason", "pnl", "return_pct"])
     save_rows(equity_curve, equity_output, fieldnames=["date", "equity", "cash"])
-    save_rows(symbol_summary, symbol_summary_output, fieldnames=["symbol", "buy_count", "sell_count", "realized_pnl", "avg_return", "win_rate", "profit_factor", "closed_trades"])
+    save_rows(symbol_summary, symbol_summary_output, fieldnames=["symbol", "buy_count", "sell_count", "realized_pnl", "average_return", "win_rate", "profit_factor", "closed_trades", "max_consecutive_loss"])
+    save_rows(_portfolio_metrics_rows(metrics), portfolio_metrics_output, fieldnames=["metric", "value"])
     return BacktestResult(trades=trades, equity_curve=equity_curve, symbol_summary=symbol_summary, metrics=metrics)
