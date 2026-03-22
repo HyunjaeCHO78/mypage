@@ -1,0 +1,19 @@
+defaults:
+  initial_equity: 10000000
+  max_positions: 5
+  risk_per_trade: 0.01
+  atr_period: 14
+  atr_multiplier: 2.0
+  allocation_plan: [0.3, 0.4, 0.3]
+  scanner_lookback: 20
+  report_dir: reports
+  log_dir: logs
+  data_dir: data
+broker:
+  starting_cash: 10000000
+  slippage_bps: 5
+  fee_bps: 5
+strategy:
+  ma_short: 5
+  ma_mid: 20
+  ma_long: 40
