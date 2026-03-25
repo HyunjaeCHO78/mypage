@@ -4,20 +4,24 @@
 장 마감 데이터를 수집해서 input/market_close.json 파일을 생성하는 스크립트.
 
 요약:
-- yfinance로 주요 지표/ETF의 최근 종가를 조회
+- yfinance가 설치되어 있으면 주요 지표/ETF의 최근 종가를 조회
 - 최근 2개 종가를 바탕으로 전일 대비 변동률(%) 계산
-- 값이 없으면 null(None)로 저장
+- yfinance가 없거나 네트워크 조회 실패 시에도 JSON 뼈대는 반드시 생성
 - 결과를 UTF-8(JSON)으로 저장하고 생성 경로를 출력
 """
 
 from __future__ import annotations
 
 import json
+import math
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
 
-import pandas as pd
-import yfinance as yf
+try:
+    import yfinance as yf
+except Exception:
+    yf = None
 
 
 # 수집 대상 티커 정의
@@ -32,11 +36,14 @@ TICKERS = {
 
 
 def safe_float(value) -> Optional[float]:
-    """pandas/numpy 타입을 JSON 직렬화 가능한 float 또는 None으로 변환."""
+    """JSON 직렬화 가능한 float 또는 None으로 변환."""
     try:
-        if value is None or pd.isna(value):
+        if value is None:
             return None
-        return float(value)
+        number = float(value)
+        if math.isnan(number):
+            return None
+        return number
     except Exception:
         return None
 
@@ -51,10 +58,13 @@ def fetch_close_and_change_pct(ticker: str) -> Tuple[Optional[float], Optional[f
 
     데이터가 부족하거나 예외가 발생하면 (None, None)을 반환한다.
     """
+    if yf is None:
+        return None, None
+
     try:
         # period=7d로 받아 두고, 종가가 2개 이상 존재하는지 확인
         hist = yf.Ticker(ticker).history(period="7d", interval="1d", auto_adjust=False)
-        if hist.empty or "Close" not in hist.columns:
+        if hist is None or hist.empty or "Close" not in hist.columns:
             return None, None
 
         close_series = hist["Close"].dropna()
@@ -88,8 +98,8 @@ def build_output_payload() -> dict:
     kodex_bond_close, kodex_bond_chg = fetch_close_and_change_pct(TICKERS["kodex_us10y"])
     kodex_wti_inv_close, kodex_wti_inv_chg = fetch_close_and_change_pct(TICKERS["kodex_wti_inverse"])
 
-    # 날짜는 시스템 로컬 날짜(YYYY-MM-DD) 기준
-    today_str = pd.Timestamp.now().strftime("%Y-%m-%d")
+    # 날짜는 UTC 현재일(YYYY-MM-DD) 기준
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
 
     return {
         "date": today_str,
@@ -106,10 +116,10 @@ def build_output_payload() -> dict:
         "kodex_wti_inverse_close": kodex_wti_inv_close,
         "kodex_wti_inverse_change_pct": kodex_wti_inv_chg,
         # 아래 4개는 운용자가 이후 입력/보정할 수 있도록 기본값 제공
-        "cash_ratio_current": None,
-        "position_kodex_us10y": None,
-        "position_kodex_wti_inverse": None,
-        "notes": None,
+        "cash_ratio_current": 0.45,
+        "position_kodex_us10y": 0,
+        "position_kodex_wti_inverse": 0,
+        "notes": "실시간 매매 금지. 장마감 데이터 기반 다음날 전략용.",
     }
 
 
@@ -131,6 +141,8 @@ def main() -> None:
             encoding="utf-8",
         )
 
+        if yf is None:
+            print("경고: yfinance 미설치 상태입니다. 가격 데이터는 null로 생성되었습니다.")
         print(f"생성 완료: {output_file}")
     except Exception as exc:
         print(f"오류 발생: market_close.json 생성 실패 - {exc}")
