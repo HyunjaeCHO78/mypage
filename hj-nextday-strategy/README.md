@@ -5,54 +5,49 @@
 
 > 핵심: 실시간 매매가 아니라 **장마감 데이터 기반의 다음날 전략 준비**에 집중합니다.
 
-## 1) 프로젝트 목적
-- 시장 마감 후 주요 지표(채권/원유/미국지수/국내 ETF) 데이터를 정리합니다.
-- 정리된 입력 파일을 기준으로 다음 거래일 계획을 일관되게 작성합니다.
-- 감정 매매를 줄이고, 현금 비중/손절 기준을 포함한 보수적 운영을 돕습니다.
-
-## 2) 설치 방법
+## 준비
 1. Python 3.9+ 설치
 2. 프로젝트 폴더로 이동
-3. 아래 명령 실행
 
+```bash
+cd hj-nextday-strategy
+```
+
+## 실행 순서 (가장 쉬운 버전)
+
+### 1) 의존성 설치
 ```bash
 pip install -r requirements.txt
 ```
 
-## 3) 장마감 데이터 생성 방법
-아래 스크립트를 실행하면 `input/market_close.json` 파일이 생성됩니다.
-
+### 2) 장마감 입력 파일 생성
 ```bash
 python generate_market_close.py
 ```
+- 생성 파일: `input/market_close.json`
+- 참고: 네트워크/패키지 문제로 시세 수집이 실패해도 JSON 파일 뼈대는 생성됩니다.
 
-## 4) 맥 실행 방법
-Finder에서 `run_mac.command`를 더블클릭하거나, 터미널에서 실행하세요.
+### 3) 다음날 전략 파일 작성(후속 프롬프트 사용)
+아래 3개 출력 파일을 생성/갱신합니다.
+- `output/PLAN_TOMORROW.md`
+- `output/ORDERS_TOMORROW.csv`
+- `output/CHECKLIST_TOMORROW.md`
 
+## OS별 실행
+
+### macOS
+Finder에서 `run_mac.command` 더블클릭 또는 터미널 실행:
 ```bash
 bash run_mac.command
 ```
 
-## 5) 윈도우 실행 방법
-`run_windows.bat` 파일을 더블클릭해서 실행하세요.
-
-또는 CMD에서:
-
+### Windows
+`run_windows.bat` 더블클릭 또는 CMD 실행:
 ```bat
 run_windows.bat
 ```
 
-## 6) 직접 실행 방법
-운영체제와 상관없이 수동 실행도 가능합니다.
-
-```bash
-pip install -r requirements.txt
-python generate_market_close.py
-```
-
-(맥에서 기본 Python이 3가 필요한 경우 `python3 generate_market_close.py` 사용)
-
-## 7) 생성 결과 파일 설명
+## 생성 결과 파일 설명
 - `input/market_close.template.json`: 입력 구조 템플릿
 - `input/market_close.json`: 장마감 수집 결과
 - `output/PLAN_TOMORROW.md`: 다음 거래일 전략 문서
@@ -80,3 +75,10 @@ input/market_close.json을 읽고
 - 불확실하면 관망 우선
 - 현금 비중 제안 포함
 - 마지막에 '내일 하지 말아야 할 행동 3가지' 추가
+
+---
+
+## 초보자용 1-2-3 요약
+1. `pip install -r requirements.txt` 실행
+2. `python generate_market_close.py` 실행해 `input/market_close.json` 생성 확인
+3. Codex 후속 프롬프트로 `output` 3개 파일 생성/갱신
