@@ -1,0 +1,19 @@
+{
+  "date": "2026-03-25",
+  "us10y_futures_close": null,
+  "us10y_futures_change_pct": null,
+  "wti_futures_close": null,
+  "wti_futures_change_pct": null,
+  "sp500_close": null,
+  "sp500_change_pct": null,
+  "nasdaq_close": null,
+  "nasdaq_change_pct": null,
+  "kodex_us10y_close": null,
+  "kodex_us10y_change_pct": null,
+  "kodex_wti_inverse_close": null,
+  "kodex_wti_inverse_change_pct": null,
+  "cash_ratio_current": 0.45,
+  "position_kodex_us10y": 0,
+  "position_kodex_wti_inverse": 0,
+  "notes": "실시간 매매 금지. 장마감 데이터 기반 다음날 전략용."
+}
