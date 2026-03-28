@@ -1,0 +1,6 @@
+ticker,name,theme,material_clarity,trading_value,foreign_flow,institutional_flow,program_flow,chart_position,early_stage,next_day_expectation,market_alignment,understanding
+111111,AlphaBio,바이오,2,2,1,0,1,2,1,2,2,2
+222222,NeoChip,반도체,1,2,2,2,1,1,1,1,2,1
+333333,QuantumSoft,AI 소프트웨어,1,1,0,0,1,2,2,2,1,2
+444444,SolarNext,태양광,2,1,1,1,1,1,2,2,1,1
+555555,ValueSteel,철강,0,1,1,1,0,1,0,0,1,2

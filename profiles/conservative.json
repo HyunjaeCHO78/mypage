@@ -1,0 +1,34 @@
+{
+  "profile_name": "conservative",
+  "minimum_total_score": 13.5,
+  "required_fields": [
+    "ticker",
+    "name",
+    "material_clarity",
+    "trading_value",
+    "chart_position",
+    "early_stage",
+    "market_alignment",
+    "understanding"
+  ],
+  "weights": {
+    "material_clarity": 1.6,
+    "trading_value": 1.9,
+    "foreign_flow": 1.4,
+    "institutional_flow": 1.3,
+    "program_flow": 1.2,
+    "chart_position": 1.4,
+    "early_stage": 1.0,
+    "next_day_expectation": 0.9,
+    "market_alignment": 1.8,
+    "understanding": 1.1
+  },
+  "top_n": 3,
+  "tie_break_rules": [
+    "market_alignment",
+    "trading_value",
+    "material_clarity",
+    "chart_position",
+    "name"
+  ]
+}

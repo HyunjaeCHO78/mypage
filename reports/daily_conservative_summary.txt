@@ -1,0 +1,8 @@
+[Daily Conservative Summary]
+input=templates/candidate_input_template.csv
+output=reports/candidates_conservative_top3.json
+
+[Top 3 Candidates]
+1. AlphaBio [111111] | score=21.0 | details=거래대금=3.8, 시황일치=3.6, 재료=3.2, 차트=2.8
+2. NeoChip [222222] | score=20.0 | details=거래대금=3.8, 시황일치=3.6, 외국인=2.8, 기관=2.6
+3. SolarNext [444444] | score=17.1 | details=재료=3.2, 초입성=2.0, 거래대금=1.9, 기대감=1.8

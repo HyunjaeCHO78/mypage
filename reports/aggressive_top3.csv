@@ -1,0 +1,4 @@
+rank,profile_name,ticker,name,theme,total_score,passed,major_score_details,warnings
+1,aggressive,111111,AlphaBio,바이오,19.3,True,"차트=3.4, 기대감=3.2, 거래대금=2.6, 재료=2.4",
+2,aggressive,444444,SolarNext,태양광,16.8,True,"초입성=3.6, 기대감=3.2, 재료=2.4, 차트=1.7",
+3,aggressive,333333,QuantumSoft,AI 소프트웨어,16.6,True,"초입성=3.6, 차트=3.4, 기대감=3.2, 이해도=2.0",

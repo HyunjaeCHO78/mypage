@@ -1,0 +1,35 @@
+[
+  {
+    "rank": 1,
+    "profile_name": "aggressive",
+    "ticker": "111111",
+    "name": "AlphaBio",
+    "theme": "바이오",
+    "total_score": 19.3,
+    "passed": true,
+    "major_score_details": "차트=3.4, 기대감=3.2, 거래대금=2.6, 재료=2.4",
+    "warnings": ""
+  },
+  {
+    "rank": 2,
+    "profile_name": "aggressive",
+    "ticker": "444444",
+    "name": "SolarNext",
+    "theme": "태양광",
+    "total_score": 16.8,
+    "passed": true,
+    "major_score_details": "초입성=3.6, 기대감=3.2, 재료=2.4, 차트=1.7",
+    "warnings": ""
+  },
+  {
+    "rank": 3,
+    "profile_name": "aggressive",
+    "ticker": "333333",
+    "name": "QuantumSoft",
+    "theme": "AI 소프트웨어",
+    "total_score": 16.6,
+    "passed": true,
+    "major_score_details": "초입성=3.6, 차트=3.4, 기대감=3.2, 이해도=2.0",
+    "warnings": ""
+  }
+]
