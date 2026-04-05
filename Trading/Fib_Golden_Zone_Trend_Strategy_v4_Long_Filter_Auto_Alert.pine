@@ -1,0 +1,304 @@
+//@version=5
+strategy("Fib Golden Zone Trend Strategy v4 Long Filter [AUTO ALERT BTCUSDT 1H]", overlay=true, pyramiding=0, process_orders_on_close=true, commission_type=strategy.commission.percent, commission_value=0.05, initial_capital=10000)
+
+// =========================
+// Inputs (v4 core)
+// =========================
+enableLong = input.bool(true, "Enable Long")
+enableShort = input.bool(true, "Enable Short")
+longUseExtraFilter = input.bool(false, "longUseExtraFilter")
+
+emaFastLen = input.int(50, "EMA Fast Length", minval=1)
+emaSlowLen = input.int(200, "EMA Slow Length", minval=1)
+
+useADXFilter = input.bool(true, "Use ADX Filter")
+diLength = input.int(14, "DI Length", minval=1)
+adxSmoothing = input.int(14, "ADX Smoothing", minval=1)
+adxMin = input.float(15.0, "ADX Minimum", minval=1, step=0.1)
+
+useFractal = input.bool(false, "useFractal")
+pivotLeft = input.int(2, "pivotLeft", minval=1)
+pivotRight = input.int(2, "pivotRight", minval=1)
+touchToConfirmMaxBars = input.int(3, "Touch->Confirm Max Bars", minval=1)
+longConfirmMode = input.string("Close Up", "Long Confirm Mode", options=["Close Up", "EMA Fast Up", "Any"])
+shortConfirmMode = input.string("Close Down", "Short Confirm Mode", options=["Close Down", "EMA Fast Down", "Any"])
+
+fibEntryMain = input.float(0.5, "Fib Entry Main", step=0.001)
+fibEntryAlt = input.float(0.618, "Fib Entry Alt", step=0.001)
+fibEntryShallow = input.float(0.382, "Fib Entry 0.382", step=0.001)
+useShallow382 = input.bool(true, "Use 0.382 Reaction Option")
+goldenLow = input.float(0.5, "goldenLow", step=0.001)
+goldenHigh = input.float(0.618, "goldenHigh", step=0.001)
+entryTolerancePct = input.float(0.0015, "Entry Tolerance %", minval=0.0, step=0.0001)
+
+slAtrLen = input.int(14, "SL ATR Length", minval=1)
+slAtrMult = input.float(1.2, "SL ATR Multiplier", minval=0.1, step=0.1)
+minimumRR = input.float(1.20, "Minimum RR", minval=0.1, step=0.05)
+rewardTargetMode = input.string("MaxOfBoth", "Reward Target Mode", options=["FIB_EXT", "RR", "MaxOfBoth"])
+
+tp1RR = input.float(1.0, "TP1 RR", minval=0.1, step=0.1)
+tp2RR = input.float(2.0, "TP2 RR", minval=0.2, step=0.1)
+tp1QtyPct = input.float(50.0, "TP1 Qty %", minval=1, maxval=99, step=1)
+useTrailingStop = input.bool(true, "Use Trailing Stop")
+trailAfterTP1Only = input.bool(true, "Trail After TP1 Only")
+trailAtrMult = input.float(1.0, "Trail ATR Multiplier", minval=0.1, step=0.1)
+moveToBEAfterTP1 = input.bool(true, "Move Stop to BreakEven After TP1")
+closeOnOppositeSignal = input.bool(true, "Close On Opposite Signal")
+maxBarsSincePivot = input.int(40, "maxBarsSincePivot", minval=1)
+minSwingAtrMult = input.float(1.0, "minSwingAtrMult", minval=0.0, step=0.1)
+
+useSessionFilter = input.bool(false, "Use Session Filter")
+tradeSession = input.session("0900-2300", "Trade Session")
+useVolumeFilter = input.bool(false, "Use Volume Filter")
+volumeMaLen = input.int(20, "Volume MA Length", minval=1)
+volumeMinMult = input.float(1.0, "Volume Min Mult", minval=0.1, step=0.1)
+useATRRangeFilter = input.bool(false, "Use ATR Range Filter")
+atrRangeMaLen = input.int(20, "ATR Range MA Length", minval=1)
+atrRangeMinMult = input.float(0.8, "ATR Range Min Mult", minval=0.1, step=0.1)
+avoidEventSession = input.bool(false, "Avoid Event Session")
+eventSession = input.session("1230-1330", "Event Session")
+cooldownBars = input.int(5, "Cooldown Bars", minval=0)
+
+// =========================
+// Core calc
+// =========================
+barClosed = barstate.isconfirmed
+
+emaFast = ta.ema(close, emaFastLen)
+emaSlow = ta.ema(close, emaSlowLen)
+atr = ta.atr(slAtrLen)
+[diPlus, diMinus, adx] = ta.dmi(diLength, adxSmoothing)
+
+trendUp = emaFast > emaSlow
+trendDown = emaFast < emaSlow
+longExtraOk = not longUseExtraFilter or (close > emaSlow and emaFast >= emaFast[1])
+adxOk = not useADXFilter or adx >= adxMin
+sessionOk = not useSessionFilter or not na(time(timeframe.period, tradeSession))
+eventOk = not avoidEventSession or na(time(timeframe.period, eventSession))
+volMa = ta.sma(volume, volumeMaLen)
+volumeOk = not useVolumeFilter or volume >= volMa * volumeMinMult
+atrMa = ta.sma(atr, atrRangeMaLen)
+rangeOk = not useATRRangeFilter or atr >= atrMa * atrRangeMinMult
+
+// pivot/fractal swings
+ph = useFractal ? ta.pivothigh(high, 2, 2) : ta.pivothigh(high, pivotLeft, pivotRight)
+pl = useFractal ? ta.pivotlow(low, 2, 2) : ta.pivotlow(low, pivotLeft, pivotRight)
+phOffset = useFractal ? 2 : pivotRight
+plOffset = useFractal ? 2 : pivotRight
+
+var float swingHigh = na
+var float swingLow = na
+var int swingHighBar = na
+var int swingLowBar = na
+
+if not na(ph)
+    swingHigh := ph
+    swingHighBar := bar_index - phOffset
+
+if not na(pl)
+    swingLow := pl
+    swingLowBar := bar_index - plOffset
+
+haveSwings = not na(swingHigh) and not na(swingLow) and swingHigh > swingLow
+upswing = haveSwings and swingHighBar > swingLowBar
+downswing = haveSwings and swingLowBar > swingHighBar
+barsSincePivot = math.min(bar_index - nz(swingHighBar, bar_index), bar_index - nz(swingLowBar, bar_index))
+swingRange = haveSwings ? (swingHigh - swingLow) : 0.0
+swingMinOk = haveSwings and barsSincePivot <= maxBarsSincePivot and swingRange >= atr * minSwingAtrMult
+
+// fib levels
+rangeUp = upswing ? (swingHigh - swingLow) : na
+longFib382 = upswing ? swingHigh - rangeUp * 0.382 : na
+longFib50 = upswing ? swingHigh - rangeUp * 0.5 : na
+longFib618 = upswing ? swingHigh - rangeUp * 0.618 : na
+longExt1272 = upswing ? swingHigh + rangeUp * 0.272 : na
+
+rangeDown = downswing ? (swingHigh - swingLow) : na
+shortFib382 = downswing ? swingLow + rangeDown * 0.382 : na
+shortFib50 = downswing ? swingLow + rangeDown * 0.5 : na
+shortFib618 = downswing ? swingLow + rangeDown * 0.618 : na
+shortExt1272 = downswing ? swingLow - rangeDown * 0.272 : na
+
+tol = close * entryTolerancePct
+
+longInGolden = upswing and close <= math.max(longFib50, longFib618) + tol and close >= math.min(longFib50, longFib618) - tol
+longTouchMain = upswing and math.abs(close - (swingHigh - rangeUp * fibEntryMain)) <= tol
+longTouchAlt = upswing and math.abs(close - (swingHigh - rangeUp * fibEntryAlt)) <= tol
+longTouch382 = upswing and useShallow382 and math.abs(close - (swingHigh - rangeUp * fibEntryShallow)) <= tol
+longFibOk = longInGolden or longTouchMain or longTouchAlt or longTouch382
+
+shortInGolden = downswing and close >= math.min(shortFib50, shortFib618) - tol and close <= math.max(shortFib50, shortFib618) + tol
+shortTouchMain = downswing and math.abs(close - (swingLow + rangeDown * fibEntryMain)) <= tol
+shortTouchAlt = downswing and math.abs(close - (swingLow + rangeDown * fibEntryAlt)) <= tol
+shortTouch382 = downswing and useShallow382 and math.abs(close - (swingLow + rangeDown * fibEntryShallow)) <= tol
+shortFibOk = shortInGolden or shortTouchMain or shortTouchAlt or shortTouch382
+
+var int longTouchBar = na
+var int shortTouchBar = na
+if longFibOk
+    longTouchBar := bar_index
+if shortFibOk
+    shortTouchBar := bar_index
+longTouchValid = not na(longTouchBar) and (bar_index - longTouchBar <= touchToConfirmMaxBars)
+shortTouchValid = not na(shortTouchBar) and (bar_index - shortTouchBar <= touchToConfirmMaxBars)
+
+longConfirmOk = longConfirmMode == "Any" ? true : longConfirmMode == "Close Up" ? close > open : emaFast >= emaFast[1]
+shortConfirmOk = shortConfirmMode == "Any" ? true : shortConfirmMode == "Close Down" ? close < open : emaFast <= emaFast[1]
+
+// planned R/R filter
+longStopPlan = haveSwings ? math.min(swingLow - atr * slAtrMult, close - syminfo.mintick) : close - atr
+longRiskPlan = math.max(close - longStopPlan, syminfo.mintick)
+longTP2Plan = upswing ? longExt1272 : close + longRiskPlan * tp2RR
+longTP2RR = close + longRiskPlan * tp2RR
+if rewardTargetMode == "RR"
+    longTP2Plan := longTP2RR
+if rewardTargetMode == "MaxOfBoth"
+    longTP2Plan := math.max(longTP2Plan, longTP2RR)
+longRRPlan = (longTP2Plan - close) / longRiskPlan
+
+shortStopPlan = haveSwings ? math.max(swingHigh + atr * slAtrMult, close + syminfo.mintick) : close + atr
+shortRiskPlan = math.max(shortStopPlan - close, syminfo.mintick)
+shortTP2Plan = downswing ? shortExt1272 : close - shortRiskPlan * tp2RR
+shortTP2RR = close - shortRiskPlan * tp2RR
+if rewardTargetMode == "RR"
+    shortTP2Plan := shortTP2RR
+if rewardTargetMode == "MaxOfBoth"
+    shortTP2Plan := math.min(shortTP2Plan, shortTP2RR)
+shortRRPlan = (close - shortTP2Plan) / shortRiskPlan
+
+rrPassLong = longRRPlan >= minimumRR
+rrPassShort = shortRRPlan >= minimumRR
+longSignalBase = enableLong and trendUp and adxOk and longExtraOk and longTouchValid and longConfirmOk and sessionOk and eventOk and volumeOk and rangeOk and swingMinOk and rrPassLong
+shortSignalBase = enableShort and trendDown and adxOk and shortTouchValid and shortConfirmOk and sessionOk and eventOk and volumeOk and rangeOk and swingMinOk and rrPassShort
+
+// =========================
+// Entry / Close / Reverse signal
+// =========================
+shortReverseToLong = barClosed and closeOnOppositeSignal and longSignalBase and strategy.position_size < 0
+longReverseToShort = barClosed and closeOnOppositeSignal and shortSignalBase and strategy.position_size > 0
+
+longEntry = barClosed and longSignalBase and strategy.position_size <= 0
+shortEntry = barClosed and shortSignalBase and strategy.position_size >= 0
+
+longCloseBase = barClosed and strategy.position_size > 0 and (trendUp == false or close < emaSlow)
+shortCloseBase = barClosed and strategy.position_size < 0 and (trendDown == false or close > emaSlow)
+
+longClose = longCloseBase and not longReverseToShort
+shortClose = shortCloseBase and not shortReverseToLong
+
+// =========================
+// Orders + TP1/TP2/BE/Trail
+// =========================
+var float longStopInit = na
+var float longTP1 = na
+var float longTP2 = na
+var bool longTP1Hit = false
+
+var float shortStopInit = na
+var float shortTP1 = na
+var float shortTP2 = na
+var bool shortTP1Hit = false
+var int lastFlatBar = na
+
+if strategy.position_size <= 0
+    longTP1Hit := false
+if strategy.position_size >= 0
+    shortTP1Hit := false
+if strategy.position_size == 0 and strategy.position_size[1] != 0
+    lastFlatBar := bar_index
+
+cooldownOk = na(lastFlatBar) or (bar_index - lastFlatBar > cooldownBars)
+
+if longReverseToShort
+    strategy.close("L", comment="LONG_REVERSE_TO_SHORT")
+    strategy.entry("S", strategy.short, comment="SHORT_ENTRY")
+else if shortReverseToLong
+    strategy.close("S", comment="SHORT_REVERSE_TO_LONG")
+    strategy.entry("L", strategy.long, comment="LONG_ENTRY")
+else
+    if longClose
+        strategy.close("L", comment="LONG_CLOSE")
+    if shortClose
+        strategy.close("S", comment="SHORT_CLOSE")
+
+    if longEntry and strategy.position_size == 0 and cooldownOk
+        strategy.entry("L", strategy.long, comment="LONG_ENTRY")
+    if shortEntry and strategy.position_size == 0 and cooldownOk
+        strategy.entry("S", strategy.short, comment="SHORT_ENTRY")
+
+newLong = strategy.position_size > 0 and strategy.position_size[1] <= 0
+newShort = strategy.position_size < 0 and strategy.position_size[1] >= 0
+
+if newLong
+    longStopInit := longStopPlan
+    risk = math.max(strategy.position_avg_price - longStopInit, syminfo.mintick)
+    longTP1 := strategy.position_avg_price + risk * tp1RR
+    longTP2 := upswing and not na(longExt1272) ? longExt1272 : strategy.position_avg_price + risk * tp2RR
+    longTP1Hit := false
+
+if newShort
+    shortStopInit := shortStopPlan
+    risk = math.max(shortStopInit - strategy.position_avg_price, syminfo.mintick)
+    shortTP1 := strategy.position_avg_price - risk * tp1RR
+    shortTP2 := downswing and not na(shortExt1272) ? shortExt1272 : strategy.position_avg_price - risk * tp2RR
+    shortTP1Hit := false
+
+if strategy.position_size > 0 and not longTP1Hit and high >= longTP1
+    longTP1Hit := true
+
+if strategy.position_size < 0 and not shortTP1Hit and low <= shortTP1
+    shortTP1Hit := true
+
+longStopDyn = longStopInit
+if strategy.position_size > 0 and longTP1Hit
+    if moveToBEAfterTP1
+        longStopDyn := math.max(longStopDyn, strategy.position_avg_price)
+    canTrailLong = useTrailingStop and (not trailAfterTP1Only or longTP1Hit)
+    if canTrailLong
+        longStopDyn := math.max(longStopDyn, close - atr * trailAtrMult)
+
+shortStopDyn = shortStopInit
+if strategy.position_size < 0 and shortTP1Hit
+    if moveToBEAfterTP1
+        shortStopDyn := math.min(shortStopDyn, strategy.position_avg_price)
+    canTrailShort = useTrailingStop and (not trailAfterTP1Only or shortTP1Hit)
+    if canTrailShort
+        shortStopDyn := math.min(shortStopDyn, close + atr * trailAtrMult)
+
+strategy.exit("L-TP1", from_entry="L", limit=longTP1, stop=longStopDyn, qty_percent=tp1QtyPct)
+strategy.exit("L-TP2", from_entry="L", limit=longTP2, stop=longStopDyn, qty_percent=100 - tp1QtyPct)
+strategy.exit("S-TP1", from_entry="S", limit=shortTP1, stop=shortStopDyn, qty_percent=tp1QtyPct)
+strategy.exit("S-TP2", from_entry="S", limit=shortTP2, stop=shortStopDyn, qty_percent=100 - tp1QtyPct)
+
+// =========================
+// Alert messages
+// =========================
+msgLongEntry = '{"strategy":"fib_v4_btc_1h","symbol":"{{ticker}}","timeframe":"1h","action":"LONG_ENTRY","price":"{{close}}","timestamp":"{{timenow}}"}'
+msgShortEntry = '{"strategy":"fib_v4_btc_1h","symbol":"{{ticker}}","timeframe":"1h","action":"SHORT_ENTRY","price":"{{close}}","timestamp":"{{timenow}}"}'
+msgLongClose = '{"strategy":"fib_v4_btc_1h","symbol":"{{ticker}}","timeframe":"1h","action":"LONG_CLOSE","price":"{{close}}","timestamp":"{{timenow}}"}'
+msgShortClose = '{"strategy":"fib_v4_btc_1h","symbol":"{{ticker}}","timeframe":"1h","action":"SHORT_CLOSE","price":"{{close}}","timestamp":"{{timenow}}"}'
+msgLongRevToShort = '{"strategy":"fib_v4_btc_1h","symbol":"{{ticker}}","timeframe":"1h","action":"LONG_REVERSE_TO_SHORT","price":"{{close}}","timestamp":"{{timenow}}"}'
+msgShortRevToLong = '{"strategy":"fib_v4_btc_1h","symbol":"{{ticker}}","timeframe":"1h","action":"SHORT_REVERSE_TO_LONG","price":"{{close}}","timestamp":"{{timenow}}"}'
+
+alertcondition(longEntry and not shortReverseToLong, title="LONG_ENTRY", message=msgLongEntry)
+alertcondition(shortEntry and not longReverseToShort, title="SHORT_ENTRY", message=msgShortEntry)
+alertcondition(longClose, title="LONG_CLOSE", message=msgLongClose)
+alertcondition(shortClose, title="SHORT_CLOSE", message=msgShortClose)
+alertcondition(longReverseToShort, title="LONG_REVERSE_TO_SHORT", message=msgLongRevToShort)
+alertcondition(shortReverseToLong, title="SHORT_REVERSE_TO_LONG", message=msgShortRevToLong)
+
+// =========================
+// Visuals (keep chart view)
+// =========================
+plot(emaFast, "EMA Fast", color=color.new(color.orange, 0), linewidth=1)
+plot(emaSlow, "EMA Slow", color=color.new(color.blue, 0), linewidth=2)
+
+plot(longFib382, "Long Fib 0.382", color=color.new(color.green, 70), style=plot.style_linebr)
+plot(longFib50, "Long Fib 0.5", color=color.new(color.green, 40), style=plot.style_linebr)
+plot(longFib618, "Long Fib 0.618", color=color.new(color.green, 40), style=plot.style_linebr)
+
+plot(shortFib382, "Short Fib 0.382", color=color.new(color.red, 70), style=plot.style_linebr)
+plot(shortFib50, "Short Fib 0.5", color=color.new(color.red, 40), style=plot.style_linebr)
+plot(shortFib618, "Short Fib 0.618", color=color.new(color.red, 40), style=plot.style_linebr)
+
+bgcolor(trendUp ? color.new(color.green, 92) : trendDown ? color.new(color.red, 92) : na)
