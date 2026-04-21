@@ -1,0 +1,18 @@
+{
+  "market_phase": "intraday",
+  "is_connected": false,
+  "last_connected_at": null,
+  "last_message_at": null,
+  "subscriptions": {
+    "A00001": {
+      "channels": [
+        "execution",
+        "orderbook"
+      ],
+      "updated_at": "2026-04-21T03:59:21.286430+00:00"
+    }
+  },
+  "recent_messages": {},
+  "last_error": null,
+  "reconnect_count": 0
+}

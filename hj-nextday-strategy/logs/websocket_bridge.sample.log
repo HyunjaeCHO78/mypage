@@ -1,0 +1,7 @@
+2026-04-21T01:00:03Z INFO KIS websocket 연결 시도: ws://ops.koreainvestment.com:21000
+2026-04-21T01:00:04Z INFO 구독 요청: ticker=A00001 channel=execution
+2026-04-21T01:00:04Z INFO 구독 요청: ticker=A00001 channel=orderbook
+2026-04-21T01:00:04Z INFO 구독 요청: ticker=A00001 channel=trading_value
+2026-04-21T01:00:07Z INFO 수신 ticker=A00001 channel=execution intraday_signal=temporary score_input={"market_phase":"intraday","ticker":"A00001"}
+2026-04-21T01:03:55Z ERROR 연결/수신 중 오류 발생: ConnectionClosedError(code=1006)
+2026-04-21T01:03:55Z INFO 5초 후 재연결 시도
