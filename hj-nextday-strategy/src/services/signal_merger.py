@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 
 from src.services.execution_score_engine import ExecutionIntradayState, classify_execution_score
@@ -42,20 +43,49 @@ class SignalMerger:
         for item in merged_items:
             payload = item.get("intraday_payload") or {}
             classification = payload.get("intraday_classification") or {}
+            history = payload.get("history") or {}
+            recent_changes = history.get("recent_changes") or []
+
+            current_label = classification.get("label") or item.get("intraday_classification")
+            execution_priority = _intraday_execution_priority(current_label)
+            recent_change_strength = _recent_change_strength(recent_changes)
+
             intraday_rows.append(
                 {
                     "ticker": item.get("ticker"),
-                    "intraday_classification": classification.get("label") or item.get("intraday_classification"),
-                    "execution_intraday_score": item.get("execution_intraday_score"),
+                    "name": item.get("name"),
+                    "industry": item.get("industry"),
+                    "role": item.get("role"),
+                    "intraday_execution_score": item.get("execution_intraday_score"),
+                    "intraday_classification": current_label,
+                    "execution_priority": execution_priority,
                     "status": classification.get("status", "unchanged"),
-                    "change_reason": classification.get("change_reason"),
-                    "updated_at": item.get("intraday_updated_at"),
+                    "change_reason": _human_readable_reason(
+                        classification.get("change_reason"),
+                        classification.get("status", "unchanged"),
+                        classification.get("previous_label"),
+                        current_label,
+                    ),
+                    "last_updated": item.get("intraday_updated_at"),
+                    "recent_status": _recent_status(recent_changes),
+                    "recent_change_strength": recent_change_strength,
                 }
             )
 
-        intraday_rows.sort(key=lambda row: row.get("execution_intraday_score") or 0, reverse=True)
+        intraday_rows.sort(
+            key=lambda row: (
+                row.get("execution_priority") or 99,
+                -(row.get("intraday_execution_score") or 0.0),
+                -(row.get("recent_change_strength") or 0.0),
+                row.get("ticker") or "",
+            )
+        )
+        for row in intraday_rows:
+            row.pop("recent_change_strength", None)
+
         return {
             "market_phase": "intraday",
+            "generated_at": _now_iso(),
             "intraday_board": intraday_rows,
         }
 
@@ -105,3 +135,64 @@ class SignalMerger:
         merged.pop("intraday_score_change_reasons", None)
         merged.pop("intraday_payload", None)
         return merged
+
+
+def _intraday_execution_priority(label: str | None) -> int:
+    return {
+        "실행검토": 1,
+        "매수대기": 2,
+        "후보": 3,
+        "관찰": 4,
+        "제외": 5,
+    }.get(label or "", 99)
+
+
+def _recent_change_strength(recent_changes: list[dict[str, Any]]) -> float:
+    if not recent_changes:
+        return 0.0
+    return abs(float(recent_changes[-1].get("delta") or 0.0))
+
+
+def _recent_status(recent_changes: list[dict[str, Any]]) -> list[str]:
+    rows = []
+    for event in recent_changes[-5:]:
+        reasons = event.get("reasons") or []
+        reasons_text = ", ".join(_reason_label(reason) for reason in reasons) if reasons else "사유 없음"
+        rows.append(
+            f"{event.get('at')} | {float(event.get('before') or 0):.1f}→{float(event.get('after') or 0):.1f} ({float(event.get('delta') or 0):+,.1f}) | {reasons_text}"
+        )
+    return rows
+
+
+def _human_readable_reason(
+    reason_code: str | None,
+    status: str,
+    previous_label: str | None,
+    current_label: str | None,
+) -> str:
+    messages: list[str] = []
+    if status == "changed" and previous_label and current_label:
+        messages.append(f"분류 변경: {previous_label} → {current_label}")
+    elif status == "suppressed":
+        messages.append("동일 분류 유지 (과도 갱신 억제)")
+
+    if reason_code:
+        messages.append(_reason_label(reason_code))
+
+    return " / ".join(messages) if messages else "변화 없음"
+
+
+def _reason_label(reason_code: str) -> str:
+    mapping = {
+        "breakout_detected:+12": "돌파 감지로 점수 상승(+12)",
+        "trading_value_spike:+10": "거래대금 급증으로 점수 상승(+10)",
+        "trade_strength_change>=120:+8": "체결강도 강세(120 이상)로 점수 상승(+8)",
+        "trade_strength_change<=85:-8": "체결강도 약화(85 이하)로 점수 하락(-8)",
+        "leader_follower_alignment_hint=aligned:+5": "대표/후발 정렬 양호로 점수 상승(+5)",
+        "leader_follower_alignment_hint=lagging:-4": "대표/후발 정렬 약화로 점수 하락(-4)",
+    }
+    return mapping.get(reason_code, reason_code)
+
+
+def _now_iso() -> str:
+    return datetime.now(tz=timezone.utc).isoformat()

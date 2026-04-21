@@ -103,6 +103,7 @@ class KISWebsocketBridge:
             state = self.state_service.update_subscription(state, item.ticker, list(self.config.channels))
 
     async def _listen(self, ws: Any, state: Any, score_states: dict[str, Any]) -> None:
+        watch_item_map = {item.ticker: item for item in self.watchlist_service.load_watch_items()}
         async for raw_message in ws:
             parsed = self._parse_message(raw_message)
             if not parsed:
@@ -119,14 +120,25 @@ class KISWebsocketBridge:
             self.execution_score_state_service.save_all(score_states)
 
             market_phase = score_input.get("market_phase", "intraday")
+            watch_item = watch_item_map.get(ticker)
             merged_view = self.signal_merger.merge_for_phase(
-                board_item={"ticker": ticker},
+                board_item={
+                    "ticker": ticker,
+                    "name": watch_item.name if watch_item else None,
+                    "industry": watch_item.industry if watch_item else None,
+                    "role": watch_item.role if watch_item else None,
+                },
                 market_phase=market_phase,
                 intraday_state=intraday_state,
             )
             merged_items = [
                 self.signal_merger.merge_for_phase(
-                    board_item={"ticker": state_ticker},
+                    board_item={
+                        "ticker": state_ticker,
+                        "name": watch_item_map[state_ticker].name if state_ticker in watch_item_map else None,
+                        "industry": watch_item_map[state_ticker].industry if state_ticker in watch_item_map else None,
+                        "role": watch_item_map[state_ticker].role if state_ticker in watch_item_map else None,
+                    },
                     market_phase=market_phase,
                     intraday_state=state_value,
                 )
