@@ -54,24 +54,85 @@ class SignalMergerTest(unittest.TestCase):
         merged_items = [
             {
                 "ticker": "A00003",
+                "name": "샘플3",
+                "industry": "수송",
+                "role": "후발주",
                 "intraday_classification": "관찰",
                 "execution_intraday_score": 37,
+                "intraday_updated_at": "2026-04-21T09:15:00+00:00",
                 "intraday_payload": {
                     "intraday_classification": {
                         "status": "suppressed",
                         "change_reason": "trade_strength_change<=85:-8",
+                        "previous_label": "관찰",
+                        "label": "관찰",
+                    },
+                    "history": {
+                        "recent_changes": [
+                            {
+                                "at": "2026-04-21T09:15:00+00:00",
+                                "before": 45,
+                                "after": 37,
+                                "delta": -8,
+                                "reasons": ["trade_strength_change<=85:-8"],
+                            }
+                        ]
                     }
                 },
             },
             {
                 "ticker": "A00001",
+                "name": "샘플1",
+                "industry": "에너지",
+                "role": "대표주",
                 "intraday_classification": "실행검토",
                 "execution_intraday_score": 74,
+                "intraday_updated_at": "2026-04-21T09:16:00+00:00",
                 "intraday_payload": {
                     "intraday_classification": {
                         "status": "changed",
                         "change_reason": "breakout_detected:+12",
+                        "previous_label": "매수대기",
+                        "label": "실행검토",
+                    },
+                    "history": {
+                        "recent_changes": [
+                            {
+                                "at": "2026-04-21T09:16:00+00:00",
+                                "before": 62,
+                                "after": 74,
+                                "delta": 12,
+                                "reasons": ["breakout_detected:+12"],
+                            }
+                        ]
                     }
+                },
+            },
+            {
+                "ticker": "A00002",
+                "name": "샘플2",
+                "industry": "금융",
+                "role": "대표주",
+                "intraday_classification": "실행검토",
+                "execution_intraday_score": 71,
+                "intraday_updated_at": "2026-04-21T09:17:00+00:00",
+                "intraday_payload": {
+                    "intraday_classification": {
+                        "status": "unchanged",
+                        "change_reason": "trading_value_spike:+10",
+                        "label": "실행검토",
+                    },
+                    "history": {
+                        "recent_changes": [
+                            {
+                                "at": "2026-04-21T09:17:00+00:00",
+                                "before": 61,
+                                "after": 71,
+                                "delta": 10,
+                                "reasons": ["trading_value_spike:+10"],
+                            }
+                        ]
+                    },
                 },
             },
         ]
@@ -79,9 +140,14 @@ class SignalMergerTest(unittest.TestCase):
         board = self.merger.build_intraday_board(merged_items, "intraday")
 
         self.assertEqual(board["market_phase"], "intraday")
-        self.assertEqual(len(board["intraday_board"]), 2)
+        self.assertEqual(len(board["intraday_board"]), 3)
         self.assertEqual(board["intraday_board"][0]["ticker"], "A00001")
-        self.assertEqual(board["intraday_board"][1]["status"], "suppressed")
+        self.assertEqual(board["intraday_board"][1]["ticker"], "A00002")
+        self.assertEqual(board["intraday_board"][2]["status"], "suppressed")
+        self.assertEqual(board["intraday_board"][0]["execution_priority"], 1)
+        self.assertIn("분류 변경", board["intraday_board"][0]["change_reason"])
+        self.assertTrue(board["intraday_board"][0]["recent_status"])
+        self.assertEqual(board["intraday_board"][0]["name"], "샘플1")
 
 
 if __name__ == "__main__":
