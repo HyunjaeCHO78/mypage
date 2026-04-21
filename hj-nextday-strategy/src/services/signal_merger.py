@@ -45,10 +45,42 @@ class SignalMerger:
             classification = payload.get("intraday_classification") or {}
             history = payload.get("history") or {}
             recent_changes = history.get("recent_changes") or []
+            latest_event = history.get("last_event") or {}
+            latest_features = latest_event.get("features") or {}
 
             current_label = classification.get("label") or item.get("intraday_classification")
-            execution_priority = _intraday_execution_priority(current_label)
+            score = float(item.get("execution_intraday_score") or 0.0)
             recent_change_strength = _recent_change_strength(recent_changes)
+            classification_change_bonus = _classification_change_bonus(classification)
+            trading_value_bonus = 6.0 if bool(latest_features.get("trading_value_spike")) else 0.0
+            trade_strength_bonus = _trade_strength_bonus(float(latest_features.get("trade_strength_change") or 0.0))
+            alignment_bonus = _alignment_bonus(latest_features.get("leader_follower_alignment_hint"))
+            base_priority = _intraday_execution_priority(current_label)
+            priority_score = _priority_score(
+                score=score,
+                base_priority=base_priority,
+                recent_change_strength=recent_change_strength,
+                classification_change_bonus=classification_change_bonus,
+                trading_value_bonus=trading_value_bonus,
+                trade_strength_bonus=trade_strength_bonus,
+                alignment_bonus=alignment_bonus,
+            )
+            stabilized_priority = _stabilize_priority(
+                priority_score=priority_score,
+                base_priority=base_priority,
+                recent_change_strength=recent_change_strength,
+                status=classification.get("status", "unchanged"),
+            )
+            priority_reasons = _priority_reason(
+                score=score,
+                base_priority=base_priority,
+                recent_change_strength=recent_change_strength,
+                classification_change_bonus=classification_change_bonus,
+                trading_value_bonus=trading_value_bonus,
+                trade_strength_bonus=trade_strength_bonus,
+                alignment_bonus=alignment_bonus,
+                stabilized_priority=stabilized_priority,
+            )
 
             intraday_rows.append(
                 {
@@ -58,7 +90,10 @@ class SignalMerger:
                     "role": item.get("role"),
                     "intraday_execution_score": item.get("execution_intraday_score"),
                     "intraday_classification": current_label,
-                    "execution_priority": execution_priority,
+                    "execution_priority": stabilized_priority,
+                    "priority_score": round(priority_score, 2),
+                    "priority_reasons": priority_reasons,
+                    "priority_reason": " / ".join(priority_reasons[:2]),
                     "status": classification.get("status", "unchanged"),
                     "change_reason": _human_readable_reason(
                         classification.get("change_reason"),
@@ -69,18 +104,32 @@ class SignalMerger:
                     "last_updated": item.get("intraday_updated_at"),
                     "recent_status": _recent_status(recent_changes),
                     "recent_change_strength": recent_change_strength,
+                    "priority_history": item.get("priority_history")
+                    or payload.get("priority_history")
+                    or [],
                 }
             )
 
         intraday_rows.sort(
             key=lambda row: (
                 row.get("execution_priority") or 99,
+                -(row.get("priority_score") or 0.0),
                 -(row.get("intraday_execution_score") or 0.0),
                 -(row.get("recent_change_strength") or 0.0),
                 row.get("ticker") or "",
             )
         )
-        for row in intraday_rows:
+        for rank, row in enumerate(intraday_rows, start=1):
+            history_rows = row.get("priority_history") or []
+            history_rows.append(
+                {
+                    "at": row.get("last_updated") or _now_iso(),
+                    "execution_priority": row.get("execution_priority"),
+                    "priority_score": row.get("priority_score"),
+                }
+            )
+            row["priority_history"] = history_rows[-5:]
+            row["priority_rank"] = rank
             row.pop("recent_change_strength", None)
 
         return {
@@ -147,6 +196,74 @@ def _intraday_execution_priority(label: str | None) -> int:
     }.get(label or "", 99)
 
 
+def _priority_score(
+    score: float,
+    base_priority: int,
+    recent_change_strength: float,
+    classification_change_bonus: float,
+    trading_value_bonus: float,
+    trade_strength_bonus: float,
+    alignment_bonus: float,
+) -> float:
+    base_priority_weight = max(0.0, (6 - base_priority) * 8.0)
+    return (
+        base_priority_weight
+        + (score * 0.42)
+        + (recent_change_strength * 0.6)
+        + classification_change_bonus
+        + trading_value_bonus
+        + trade_strength_bonus
+        + alignment_bonus
+    )
+
+
+def _stabilize_priority(
+    priority_score: float,
+    base_priority: int,
+    recent_change_strength: float,
+    status: str,
+) -> int:
+    candidate = max(1, min(5, 6 - int(priority_score // 18)))
+    if candidate < base_priority and recent_change_strength < 9.0 and status != "changed":
+        return base_priority
+    if candidate < base_priority and (base_priority - candidate) >= 2 and recent_change_strength < 12.0:
+        return base_priority - 1
+    return candidate
+
+
+def _classification_change_bonus(classification: dict[str, Any]) -> float:
+    status = classification.get("status")
+    previous = classification.get("previous_label")
+    current = classification.get("label")
+    if status != "changed" or not previous or not current:
+        return 0.0
+    if _intraday_execution_priority(current) < _intraday_execution_priority(previous):
+        return 8.0
+    return -6.0
+
+
+def _trade_strength_bonus(strength: float) -> float:
+    if strength >= 130:
+        return 4.0
+    if strength >= 115:
+        return 2.5
+    if strength <= 80:
+        return -4.0
+    if strength <= 90:
+        return -2.0
+    return 0.0
+
+
+def _alignment_bonus(hint: str | None) -> float:
+    if hint == "aligned":
+        return 3.0
+    if hint == "lagging":
+        return -3.5
+    if hint == "broken":
+        return -6.0
+    return 0.0
+
+
 def _recent_change_strength(recent_changes: list[dict[str, Any]]) -> float:
     if not recent_changes:
         return 0.0
@@ -192,6 +309,42 @@ def _reason_label(reason_code: str) -> str:
         "leader_follower_alignment_hint=lagging:-4": "대표/후발 정렬 약화로 점수 하락(-4)",
     }
     return mapping.get(reason_code, reason_code)
+
+
+def _priority_reason(
+    score: float,
+    base_priority: int,
+    recent_change_strength: float,
+    classification_change_bonus: float,
+    trading_value_bonus: float,
+    trade_strength_bonus: float,
+    alignment_bonus: float,
+    stabilized_priority: int,
+) -> list[str]:
+    reasons = [
+        f"기본분류 우선순위 {base_priority}",
+        f"장중점수 {score:.1f}",
+    ]
+    if recent_change_strength >= 9:
+        reasons.append(f"최근 변화강도 반영(+{recent_change_strength:.1f})")
+    else:
+        reasons.append("최근 변화강도 낮아 변동 억제")
+    if classification_change_bonus > 0:
+        reasons.append("최근 분류 상향 반영")
+    elif classification_change_bonus < 0:
+        reasons.append("최근 분류 하향 반영")
+    if trading_value_bonus > 0:
+        reasons.append("거래대금 급증 가산")
+    if trade_strength_bonus > 0:
+        reasons.append("체결강도 개선 가산")
+    elif trade_strength_bonus < 0:
+        reasons.append("체결강도 약화 감점")
+    if alignment_bonus > 0:
+        reasons.append("대표/후발 정렬 양호 가산")
+    elif alignment_bonus < 0:
+        reasons.append("대표/후발 정렬 불량 감점")
+    reasons.append(f"최종 실행 우선순위 {stabilized_priority}")
+    return reasons
 
 
 def _now_iso() -> str:
