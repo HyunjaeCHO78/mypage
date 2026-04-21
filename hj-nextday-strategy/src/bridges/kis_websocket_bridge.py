@@ -11,6 +11,7 @@ from typing import Any
 from src.services.execution_score_engine import ExecutionScoreEngine
 from src.services.execution_score_state_service import ExecutionScoreStateService
 from src.services.realtime_state_service import RealtimeStateService
+from src.services.intraday_board_state_service import IntradayBoardStateService
 from src.services.signal_merger import SignalMerger
 from src.services.watchlist_service import WatchlistService
 
@@ -45,6 +46,7 @@ class KISWebsocketBridge:
         self.execution_score_engine = ExecutionScoreEngine()
         self.execution_score_state_service = ExecutionScoreStateService(root_dir)
         self.signal_merger = SignalMerger()
+        self.intraday_board_state_service = IntradayBoardStateService(root_dir)
         self.logger = self._build_logger(root_dir)
 
     @staticmethod
@@ -116,11 +118,22 @@ class KISWebsocketBridge:
             score_states[ticker] = intraday_state
             self.execution_score_state_service.save_all(score_states)
 
+            market_phase = score_input.get("market_phase", "intraday")
             merged_view = self.signal_merger.merge_for_phase(
                 board_item={"ticker": ticker},
-                market_phase=score_input.get("market_phase", "intraday"),
+                market_phase=market_phase,
                 intraday_state=intraday_state,
             )
+            merged_items = [
+                self.signal_merger.merge_for_phase(
+                    board_item={"ticker": state_ticker},
+                    market_phase=market_phase,
+                    intraday_state=state_value,
+                )
+                for state_ticker, state_value in score_states.items()
+            ]
+            intraday_board = self.signal_merger.build_intraday_board(merged_items, market_phase=market_phase)
+            self.intraday_board_state_service.save(intraday_board)
 
             self.logger.info(
                 "수신 ticker=%s channel=%s intraday_signal=%s score_input=%s intraday_score=%.2f intraday_classification=%s reasons=%s",
