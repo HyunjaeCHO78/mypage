@@ -1,0 +1,15 @@
+{
+  "market_phase": "intraday",
+  "ticker": "A00001",
+  "intraday_signal_type": "temporary",
+  "features": {
+    "breakout_detected": true,
+    "trading_value_spike": true,
+    "trade_strength_change": 128.5,
+    "leader_follower_alignment_hint": "aligned"
+  },
+  "source": {
+    "channel": "execution",
+    "received_at": "2026-04-21T01:00:07.413000+00:00"
+  }
+}

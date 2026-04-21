@@ -1,2 +1,5 @@
 yfinance
 pandas
+
+PyYAML
+websockets

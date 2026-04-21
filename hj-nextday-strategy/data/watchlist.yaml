@@ -1,0 +1,17 @@
+groups:
+  - industry: 에너지
+    stocks:
+      - ticker: "A00001"
+        name: 샘플에너지리더
+        role: 대표주
+      - ticker: "A00011"
+        name: 샘플에너지후발
+        role: 후발주
+  - industry: 금융
+    stocks:
+      - ticker: "D10004"
+        name: 샘플금융정렬양호
+        role: 대표주
+      - ticker: "D20005"
+        name: 샘플금융정렬붕괴
+        role: 후발주
