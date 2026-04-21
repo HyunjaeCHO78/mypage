@@ -1,0 +1,164 @@
+{
+  "date": "2026-04-21",
+  "market_phase": "post_close",
+  "signals": [
+    {
+      "scenario_id": "A",
+      "industry": "에너지",
+      "ticker": "A00001",
+      "name": "샘플에너지리더",
+      "leader_follower_type": "대표주",
+      "leader_alignment": "aligned",
+      "industry_stage": 2,
+      "scores": {
+        "cot": 22,
+        "foreign_flow": 30,
+        "industry_cycle": 24,
+        "execution": 9,
+        "total": 85
+      },
+      "raw_classification": "실행검토",
+      "final_classification": "실행검토",
+      "adjustments": [],
+      "industry_comment": "산업 초입/상승 구간으로 해석",
+      "stock_comment": "대표/후발 정렬 점검 반영",
+      "evidence_summary": [
+        "COT 22점",
+        "외국인 순매수 30점",
+        "산업사이클 2단계/24점",
+        "실행점수 9점"
+      ],
+      "next_action": "장중 거래대금/돌파 여부 점검",
+      "execution_priority": 1,
+      "bridge_ready": true
+    },
+    {
+      "scenario_id": "B",
+      "industry": "통신",
+      "ticker": "B00002",
+      "name": "샘플통신고점",
+      "leader_follower_type": "대표주",
+      "leader_alignment": "aligned",
+      "industry_stage": 5,
+      "scores": {
+        "cot": 22,
+        "foreign_flow": 29,
+        "industry_cycle": 24,
+        "execution": 10,
+        "total": 85
+      },
+      "raw_classification": "실행검토",
+      "final_classification": "매수대기",
+      "adjustments": [
+        "industry_stage_conservative_downgrade"
+      ],
+      "industry_comment": "산업 후반/과열 구간, 보수적 접근 필요",
+      "stock_comment": "대표/후발 정렬 점검 반영",
+      "evidence_summary": [
+        "COT 22점",
+        "외국인 순매수 29점",
+        "산업사이클 5단계/24점",
+        "실행점수 10점"
+      ],
+      "next_action": "장중 거래대금/돌파 여부 점검",
+      "execution_priority": 2,
+      "bridge_ready": false
+    },
+    {
+      "scenario_id": "C",
+      "industry": "수송",
+      "ticker": "C00003",
+      "name": "샘플수송외국인단독",
+      "leader_follower_type": "후발주",
+      "leader_alignment": "mixed",
+      "industry_stage": 3,
+      "scores": {
+        "cot": 10,
+        "foreign_flow": 30,
+        "industry_cycle": 12,
+        "execution": 4,
+        "total": 56
+      },
+      "raw_classification": "후보",
+      "final_classification": "후보",
+      "adjustments": [
+        "leader_follower_misalignment_penalty",
+        "foreign_flow_standalone_cap"
+      ],
+      "industry_comment": "산업 중반 구간, 추세 확인 필요",
+      "stock_comment": "대표/후발 정렬 점검 반영",
+      "evidence_summary": [
+        "COT 10점",
+        "외국인 순매수 30점",
+        "산업사이클 3단계/12점",
+        "실행점수 4점"
+      ],
+      "next_action": "장중 거래대금/돌파 여부 점검",
+      "execution_priority": 3,
+      "bridge_ready": false
+    },
+    {
+      "scenario_id": "D1",
+      "industry": "금융",
+      "ticker": "D10004",
+      "name": "샘플금융정렬양호",
+      "leader_follower_type": "대표주",
+      "leader_alignment": "aligned",
+      "industry_stage": 2,
+      "scores": {
+        "cot": 21,
+        "foreign_flow": 24,
+        "industry_cycle": 22,
+        "execution": 11,
+        "total": 78
+      },
+      "raw_classification": "매수대기",
+      "final_classification": "매수대기",
+      "adjustments": [],
+      "industry_comment": "산업 초입/상승 구간으로 해석",
+      "stock_comment": "대표/후발 정렬 점검 반영",
+      "evidence_summary": [
+        "COT 21점",
+        "외국인 순매수 24점",
+        "산업사이클 2단계/22점",
+        "실행점수 11점"
+      ],
+      "next_action": "장중 거래대금/돌파 여부 점검",
+      "execution_priority": 2,
+      "bridge_ready": false
+    },
+    {
+      "scenario_id": "D2",
+      "industry": "금융",
+      "ticker": "D20005",
+      "name": "샘플금융정렬붕괴",
+      "leader_follower_type": "후발주",
+      "leader_alignment": "broken",
+      "industry_stage": 2,
+      "scores": {
+        "cot": 21,
+        "foreign_flow": 24,
+        "industry_cycle": 22,
+        "execution": 7,
+        "total": 74
+      },
+      "raw_classification": "매수대기",
+      "final_classification": "후보",
+      "adjustments": [
+        "leader_follower_misalignment_penalty",
+        "leader_follower_misalignment_downgrade"
+      ],
+      "industry_comment": "산업 초입/상승 구간으로 해석",
+      "stock_comment": "대표/후발 정렬 점검 반영",
+      "evidence_summary": [
+        "COT 21점",
+        "외국인 순매수 24점",
+        "산업사이클 2단계/22점",
+        "실행점수 7점"
+      ],
+      "next_action": "장중 거래대금/돌파 여부 점검",
+      "execution_priority": 3,
+      "bridge_ready": false
+    }
+  ]
+}

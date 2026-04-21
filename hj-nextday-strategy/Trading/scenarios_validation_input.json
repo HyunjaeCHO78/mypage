@@ -1,0 +1,128 @@
+{
+  "date": "2026-04-21",
+  "market_phase": "post_close",
+  "scenarios": [
+    {
+      "scenario_id": "A",
+      "industry": "에너지",
+      "ticker": "A00001",
+      "name": "샘플에너지리더",
+      "leader_follower_type": "대표주",
+      "leader_alignment": "aligned",
+      "industry_stage": 2,
+      "scores_input": {
+        "cot": 22,
+        "foreign_flow": 30,
+        "industry_cycle": 24,
+        "execution": 9
+      },
+      "expected": {
+        "score_range": "84~90",
+        "raw_classification": "실행검토",
+        "final_classification": "실행검토",
+        "conservative_downgrade": false,
+        "executable": true,
+        "required_adjustments": []
+      }
+    },
+    {
+      "scenario_id": "B",
+      "industry": "통신",
+      "ticker": "B00002",
+      "name": "샘플통신고점",
+      "leader_follower_type": "대표주",
+      "leader_alignment": "aligned",
+      "industry_stage": 5,
+      "scores_input": {
+        "cot": 22,
+        "foreign_flow": 29,
+        "industry_cycle": 24,
+        "execution": 10
+      },
+      "expected": {
+        "score_range": "84~90",
+        "raw_classification": "실행검토",
+        "final_classification": "매수대기",
+        "conservative_downgrade": true,
+        "executable": false,
+        "required_adjustments": [
+          "industry_stage_conservative_downgrade"
+        ]
+      }
+    },
+    {
+      "scenario_id": "C",
+      "industry": "수송",
+      "ticker": "C00003",
+      "name": "샘플수송외국인단독",
+      "leader_follower_type": "후발주",
+      "leader_alignment": "mixed",
+      "industry_stage": 3,
+      "scores_input": {
+        "cot": 10,
+        "foreign_flow": 30,
+        "industry_cycle": 12,
+        "execution": 8
+      },
+      "expected": {
+        "score_range": "56~65",
+        "raw_classification": "후보",
+        "final_classification": "후보",
+        "conservative_downgrade": false,
+        "executable": false,
+        "required_adjustments": [
+          "foreign_flow_standalone_cap"
+        ]
+      }
+    },
+    {
+      "scenario_id": "D1",
+      "industry": "금융",
+      "ticker": "D10004",
+      "name": "샘플금융정렬양호",
+      "leader_follower_type": "대표주",
+      "leader_alignment": "aligned",
+      "industry_stage": 2,
+      "scores_input": {
+        "cot": 21,
+        "foreign_flow": 24,
+        "industry_cycle": 22,
+        "execution": 11
+      },
+      "expected": {
+        "score_range": "76~82",
+        "raw_classification": "매수대기",
+        "final_classification": "매수대기",
+        "conservative_downgrade": false,
+        "executable": false,
+        "required_adjustments": []
+      }
+    },
+    {
+      "scenario_id": "D2",
+      "industry": "금융",
+      "ticker": "D20005",
+      "name": "샘플금융정렬붕괴",
+      "leader_follower_type": "후발주",
+      "leader_alignment": "broken",
+      "industry_stage": 2,
+      "scores_input": {
+        "cot": 21,
+        "foreign_flow": 24,
+        "industry_cycle": 22,
+        "execution": 11
+      },
+      "expected": {
+        "score_range": "71~77",
+        "raw_classification": "매수대기",
+        "final_classification": "후보",
+        "conservative_downgrade": false,
+        "executable": false,
+        "required_adjustments": [
+          "leader_follower_misalignment_penalty",
+          "leader_follower_misalignment_downgrade"
+        ]
+      }
+    }
+  ]
+}
