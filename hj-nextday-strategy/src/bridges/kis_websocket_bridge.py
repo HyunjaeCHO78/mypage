@@ -8,7 +8,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from src.services.execution_score_engine import ExecutionScoreEngine
+from src.services.execution_score_state_service import ExecutionScoreStateService
 from src.services.realtime_state_service import RealtimeStateService
+from src.services.signal_merger import SignalMerger
 from src.services.watchlist_service import WatchlistService
 
 try:
@@ -39,6 +42,9 @@ class KISWebsocketBridge:
         self.config = config
         self.watchlist_service = WatchlistService(root_dir)
         self.state_service = RealtimeStateService(root_dir)
+        self.execution_score_engine = ExecutionScoreEngine()
+        self.execution_score_state_service = ExecutionScoreStateService(root_dir)
+        self.signal_merger = SignalMerger()
         self.logger = self._build_logger(root_dir)
 
     @staticmethod
@@ -63,6 +69,7 @@ class KISWebsocketBridge:
 
         backoff = self.config.reconnect_delay_sec
         state = self.state_service.load()
+        score_states = self.execution_score_state_service.load_all()
 
         while True:
             try:
@@ -71,7 +78,7 @@ class KISWebsocketBridge:
                     state = self.state_service.mark_connected(state)
                     backoff = self.config.reconnect_delay_sec
                     await self._subscribe_watchlist(ws, state)
-                    await self._listen(ws, state)
+                    await self._listen(ws, state, score_states)
             except Exception as exc:  # noqa: BLE001
                 self.logger.exception("연결/수신 중 오류 발생: %s", exc)
                 state = self.state_service.mark_disconnected(state, error=str(exc))
@@ -93,7 +100,7 @@ class KISWebsocketBridge:
                 self.logger.info("구독 요청: ticker=%s channel=%s", item.ticker, channel)
             state = self.state_service.update_subscription(state, item.ticker, list(self.config.channels))
 
-    async def _listen(self, ws: Any, state: Any) -> None:
+    async def _listen(self, ws: Any, state: Any, score_states: dict[str, Any]) -> None:
         async for raw_message in ws:
             parsed = self._parse_message(raw_message)
             if not parsed:
@@ -102,12 +109,28 @@ class KISWebsocketBridge:
             ticker = parsed.get("ticker", "unknown")
             state = self.state_service.append_message(state, ticker, parsed)
             score_input = self._to_execution_score_input(parsed)
+            intraday_state = self.execution_score_engine.apply_intraday_payload(
+                score_input,
+                previous=score_states.get(ticker),
+            )
+            score_states[ticker] = intraday_state
+            self.execution_score_state_service.save_all(score_states)
+
+            merged_view = self.signal_merger.merge_for_phase(
+                board_item={"ticker": ticker},
+                market_phase=score_input.get("market_phase", "intraday"),
+                intraday_state=intraday_state,
+            )
+
             self.logger.info(
-                "수신 ticker=%s channel=%s intraday_signal=%s score_input=%s",
+                "수신 ticker=%s channel=%s intraday_signal=%s score_input=%s intraday_score=%.2f intraday_classification=%s reasons=%s",
                 ticker,
                 parsed.get("channel"),
                 score_input.get("intraday_signal_type"),
                 json.dumps(score_input, ensure_ascii=False),
+                intraday_state.execution_intraday_score,
+                merged_view.get("intraday_classification"),
+                ",".join(intraday_state.score_change_reasons),
             )
 
     def _build_subscribe_payload(self, ticker: str, channel: str) -> dict[str, Any]:
