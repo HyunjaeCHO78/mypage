@@ -1,0 +1,32 @@
+{
+  "date": "2026-04-22",
+  "market_phase": "post_close",
+  "signals": [
+    {
+      "scenario_id": "A",
+      "ticker": "A00001",
+      "name": "샘플에너지리더",
+      "industry": "에너지",
+      "scores": {
+        "total": 85
+      },
+      "final_classification": "실행검토",
+      "bridge_ready": true,
+      "execution_priority": 1,
+      "next_action": "다음 거래일 시초가/거래대금 재확인"
+    },
+    {
+      "scenario_id": "D1",
+      "ticker": "D10004",
+      "name": "샘플금융정렬양호",
+      "industry": "금융",
+      "scores": {
+        "total": 78
+      },
+      "final_classification": "매수대기",
+      "bridge_ready": false,
+      "execution_priority": 2,
+      "next_action": "장초반 추세 확인 후 실행검토 전환 여부 점검"
+    }
+  ]
+}
