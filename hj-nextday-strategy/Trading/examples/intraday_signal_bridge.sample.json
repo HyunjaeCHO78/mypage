@@ -1,0 +1,45 @@
+{
+  "date": "2026-04-23",
+  "market_phase": "intraday",
+  "signal_type": "temporary",
+  "version": "1.0",
+  "generated_at": "2026-04-23T03:10:00Z",
+  "signals": [
+    {
+      "ticker": "A00001",
+      "name": "샘플에너지리더",
+      "industry": "에너지",
+      "role": "대표주",
+      "intraday_execution_score": 13,
+      "intraday_classification": "실행검토",
+      "execution_priority": 1,
+      "priority_reason": "장중 거래대금 급증 + 시가 고점 동시 돌파",
+      "last_updated": "2026-04-23T03:09:41Z",
+      "recent_change_summary": "최근 5분 execution_score +2, priority 2→1"
+    },
+    {
+      "ticker": "D10004",
+      "name": "샘플금융정렬양호",
+      "industry": "금융",
+      "role": "대표주",
+      "intraday_execution_score": 8,
+      "intraday_classification": "매수대기",
+      "execution_priority": 2,
+      "priority_reason": "체결강도 우호, 돌파 재확인 필요",
+      "last_updated": "2026-04-23T03:09:10Z",
+      "recent_change_summary": "분류 유지, 거래량 조건 1개 미충족"
+    },
+    {
+      "ticker": "C00003",
+      "name": "샘플수송외국인단독",
+      "industry": "수송",
+      "role": "후발주",
+      "intraday_execution_score": 4,
+      "intraday_classification": "후보",
+      "execution_priority": 3,
+      "priority_reason": "외국인 순매수 외 확증 근거 부족",
+      "last_updated": "2026-04-23T03:08:44Z",
+      "recent_change_summary": "직전 대비 변화 없음"
+    }
+  ]
+}
