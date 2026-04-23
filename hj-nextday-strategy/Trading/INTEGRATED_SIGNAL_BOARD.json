@@ -1,6 +1,7 @@
 {
   "date": "2026-04-21",
   "market_phase": "post_close",
+  "generated_at": "2026-04-21T15:40:00Z",
   "signals": [
     {
       "scenario_id": "A",
@@ -30,7 +31,8 @@
       ],
       "next_action": "장중 거래대금/돌파 여부 점검",
       "execution_priority": 1,
-      "bridge_ready": true
+      "bridge_ready": true,
+      "last_updated": "2026-04-21T15:39:10Z"
     },
     {
       "scenario_id": "B",
@@ -62,7 +64,8 @@
       ],
       "next_action": "장중 거래대금/돌파 여부 점검",
       "execution_priority": 2,
-      "bridge_ready": false
+      "bridge_ready": false,
+      "last_updated": "2026-04-21T15:39:15Z"
     },
     {
       "scenario_id": "C",
@@ -95,7 +98,8 @@
       ],
       "next_action": "장중 거래대금/돌파 여부 점검",
       "execution_priority": 3,
-      "bridge_ready": false
+      "bridge_ready": false,
+      "last_updated": "2026-04-21T15:39:18Z"
     },
     {
       "scenario_id": "D1",
@@ -125,7 +129,8 @@
       ],
       "next_action": "장중 거래대금/돌파 여부 점검",
       "execution_priority": 2,
-      "bridge_ready": false
+      "bridge_ready": false,
+      "last_updated": "2026-04-21T15:39:22Z"
     },
     {
       "scenario_id": "D2",
@@ -158,7 +163,8 @@
       ],
       "next_action": "장중 거래대금/돌파 여부 점검",
       "execution_priority": 3,
-      "bridge_ready": false
+      "bridge_ready": false,
+      "last_updated": "2026-04-21T15:39:30Z"
     }
   ]
 }

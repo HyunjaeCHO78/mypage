@@ -1,6 +1,7 @@
 {
   "date": "2026-04-22",
   "market_phase": "post_close",
+  "generated_at": "2026-04-22T15:40:00Z",
   "signals": [
     {
       "scenario_id": "A",
@@ -13,7 +14,8 @@
       "final_classification": "실행검토",
       "bridge_ready": true,
       "execution_priority": 1,
-      "next_action": "다음 거래일 시초가/거래대금 재확인"
+      "next_action": "다음 거래일 시초가/거래대금 재확인",
+      "last_updated": "2026-04-22T15:39:05Z"
     },
     {
       "scenario_id": "D1",
@@ -26,7 +28,8 @@
       "final_classification": "매수대기",
       "bridge_ready": false,
       "execution_priority": 2,
-      "next_action": "장초반 추세 확인 후 실행검토 전환 여부 점검"
+      "next_action": "장초반 추세 확인 후 실행검토 전환 여부 점검",
+      "last_updated": "2026-04-22T15:39:11Z"
     }
   ]
 }
