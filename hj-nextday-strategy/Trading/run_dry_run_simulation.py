@@ -138,6 +138,8 @@ def evaluate_final_decision(payload: Dict) -> Tuple[str, List[str], str]:
         return "hold", hold_flags, reason
 
     pass_conditions = [
+        payload.get("market_phase") == "post_close",
+        payload.get("source_signal_type") == "post_close_confirmed",
         payload.get("final_classification") in ("실행검토", "매수대기"),
         payload.get("intraday_execution_score", 0) >= INTRADAY_EXEC_PASS_MIN,
         payload.get("execution_priority", 0) >= EXECUTION_PRIORITY_PASS_MIN,
