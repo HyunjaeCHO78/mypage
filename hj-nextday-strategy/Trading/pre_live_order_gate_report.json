@@ -1,5 +1,5 @@
 {
-  "validated_at": "2026-04-24T00:38:53.431640Z",
+  "validated_at": "2026-04-24T01:33:21.782373Z",
   "status": "pass",
   "checks": {
     "phase_separation": true,
@@ -26,6 +26,11 @@
     {
       "ticker": "P10001",
       "decision_timestamp": "2026-04-24T03:00:00Z",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능"
+    },
+    {
+      "ticker": "L10005",
+      "decision_timestamp": "2026-04-24T03:02:00Z",
       "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능"
     }
   ],

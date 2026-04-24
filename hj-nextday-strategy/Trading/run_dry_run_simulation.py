@@ -34,7 +34,18 @@ TEST_ORDER_RULES = {
     "max_orders_per_day": 2,
     "max_concurrent_positions": 2,
 }
-ELIGIBLE_TICKERS = ["005930", "000660", "P10001", "L10005"]
+ELIGIBLE_UNIVERSE_POLICY = {
+    "version": "v2.1_restricted_post_close",
+    "eligible_tickers": ["A00001", "D10004", "P10001"],
+    "required_market_phase": "post_close",
+    "required_source_signal_type": "post_close_confirmed",
+    "required_final_decision": "pass",
+    "exclude_industry_stages": [4, 5],
+    "exclude_leader_alignment": ["broken"],
+    "exclude_foreign_flow_signal": ["foreign_only_strong"],
+    "excluded_leader_follower_types": ["후발주"],
+    "allowed_liquidity_tiers": ["high", "medium"],
+}
 
 
 def load_json(path: Path) -> Dict:
@@ -45,8 +56,22 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def infer_liquidity_tier(payload: Dict) -> str:
+    if payload.get("liquidity_tier"):
+        return str(payload.get("liquidity_tier"))
+
+    if payload.get("leader_follower_type") == "대표주":
+        return "high"
+
+    if payload.get("execution_priority", 0) >= 70 and payload.get("total_score", 0) >= 75:
+        return "medium"
+
+    return "low"
+
+
 def normalize_intraday_signal(signal: Dict) -> Dict:
     classification = signal.get("intraday_classification", "후보")
+    leader_type = signal.get("role", "후발주")
     return {
         "ticker": signal["ticker"],
         "market_phase": "intraday",
@@ -58,13 +83,15 @@ def normalize_intraday_signal(signal: Dict) -> Dict:
         "execution_priority": max(0, 100 - ((signal.get("execution_priority", 5) - 1) * 15)),
         "priority_reason": signal.get("priority_reason", ""),
         "industry_stage": 3,
-        "leader_follower_alignment": "aligned" if signal.get("role") == "대표주" else "mixed",
+        "leader_follower_alignment": "aligned" if leader_type == "대표주" else "mixed",
+        "leader_follower_type": leader_type,
         "recent_change_summary": signal.get("recent_change_summary", ""),
         "foreign_flow_signal": "none",
         "intraday_noise_flag": "급등" in signal.get("recent_change_summary", ""),
         "evidence_strength": "medium",
         "required_fields_complete": True,
         "phase_consistency": True,
+        "liquidity_tier": "high" if leader_type == "대표주" else "low",
         "decision_timestamp": signal.get("last_updated") or now_iso(),
     }
 
@@ -91,6 +118,7 @@ def normalize_post_close_signal(signal: Dict) -> Dict:
         "execution_priority": max(0, 100 - ((signal.get("execution_priority", 5) - 1) * 15)),
         "priority_reason": signal.get("next_action", ""),
         "industry_stage": signal.get("industry_stage", 3),
+        "leader_follower_type": signal.get("leader_follower_type", "후발주"),
         "leader_follower_alignment": signal.get("leader_alignment", "mixed"),
         "recent_change_summary": ", ".join(signal.get("evidence_summary", [])),
         "foreign_flow_signal": foreign_flow_signal,
@@ -98,6 +126,7 @@ def normalize_post_close_signal(signal: Dict) -> Dict:
         "evidence_strength": evidence_strength,
         "required_fields_complete": True,
         "phase_consistency": True,
+        "liquidity_tier": infer_liquidity_tier(signal),
         "decision_timestamp": signal.get("last_updated") or now_iso(),
     }
 
@@ -183,8 +212,13 @@ def evaluate_test_order_eligibility(
     requested_amount = int(record.get("requested_order_amount", max_order_amount))
     requested_quantity = int(record.get("requested_order_quantity", 1))
 
-    if record["ticker"] not in ELIGIBLE_TICKERS:
+    eligible_tickers = ELIGIBLE_UNIVERSE_POLICY["eligible_tickers"]
+
+    if record["ticker"] not in eligible_tickers:
         blocked_reason.append("ticker_not_in_eligible_universe")
+
+    if record.get("leader_follower_type") in ELIGIBLE_UNIVERSE_POLICY["excluded_leader_follower_types"]:
+        blocked_reason.append("non_leader_stock_excluded")
 
     if record.get("required_fields_complete") is True:
         allowed_reason.append("required_fields_complete")
@@ -196,22 +230,28 @@ def evaluate_test_order_eligibility(
     else:
         blocked_reason.append("phase_conflict")
 
-    if record.get("market_phase") == "post_close" and record.get("source_signal_type") == "post_close_confirmed":
+    if (
+        record.get("market_phase") == ELIGIBLE_UNIVERSE_POLICY["required_market_phase"]
+        and record.get("source_signal_type") == ELIGIBLE_UNIVERSE_POLICY["required_source_signal_type"]
+    ):
         allowed_reason.append("post_close_confirmed")
     else:
         blocked_reason.append("phase_not_post_close_confirmed")
 
-    if dry_run_row["final_decision"] == "pass":
+    if dry_run_row["final_decision"] == ELIGIBLE_UNIVERSE_POLICY["required_final_decision"]:
         allowed_reason.append("final_decision_pass")
     else:
         blocked_reason.append("final_decision_not_pass")
 
-    if record.get("industry_stage", 0) >= 4:
+    if record.get("industry_stage", 0) in ELIGIBLE_UNIVERSE_POLICY["exclude_industry_stages"]:
         blocked_reason.append("industry_stage_4_or_5")
-    if record.get("leader_follower_alignment") == "broken":
+    if record.get("leader_follower_alignment") in ELIGIBLE_UNIVERSE_POLICY["exclude_leader_alignment"]:
         blocked_reason.append("leader_alignment_broken")
-    if record.get("foreign_flow_signal") == "foreign_only_strong":
+    if record.get("foreign_flow_signal") in ELIGIBLE_UNIVERSE_POLICY["exclude_foreign_flow_signal"]:
         blocked_reason.append("foreign_flow_only_strong")
+    liquidity_tier = infer_liquidity_tier(record)
+    if liquidity_tier not in ELIGIBLE_UNIVERSE_POLICY["allowed_liquidity_tiers"]:
+        blocked_reason.append("insufficient_liquidity")
     if record.get("intraday_noise_flag") is True:
         blocked_reason.append("recent_noise_spike")
 
@@ -254,6 +294,7 @@ def evaluate_test_order_eligibility(
             "max_amount_per_ticker_per_day": TEST_ORDER_RULES["max_amount_per_ticker_per_day"],
             "max_concurrent_positions": TEST_ORDER_RULES["max_concurrent_positions"],
         },
+        "eligible_universe_version": ELIGIBLE_UNIVERSE_POLICY["version"],
     }
 
 
@@ -300,11 +341,13 @@ def run_dry_run() -> Dict:
                 "execution_priority": record.get("execution_priority"),
                 "industry_stage": record.get("industry_stage"),
                 "leader_follower_alignment": record.get("leader_follower_alignment"),
+                "leader_follower_type": record.get("leader_follower_type"),
+                "liquidity_tier": infer_liquidity_tier(record),
             },
         }
         test_eval = evaluate_test_order_eligibility(record, dry_row, daily_state)
         dry_row.update(test_eval)
-        dry_row["eligible_tickers"] = ELIGIBLE_TICKERS
+        dry_row["eligible_tickers"] = ELIGIBLE_UNIVERSE_POLICY["eligible_tickers"]
         results.append(dry_row)
         test_order_results.append(dry_row)
 
@@ -312,6 +355,7 @@ def run_dry_run() -> Dict:
         "generated_at": now_iso(),
         "order_api_called": False,
         "test_order_rules": TEST_ORDER_RULES,
+        "eligible_universe_policy": ELIGIBLE_UNIVERSE_POLICY,
         "result_count": len(results),
         "decision_counts": {
             "pass": sum(1 for r in results if r["final_decision"] == "pass"),

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-24T01:15:16.256339Z",
+  "generated_at": "2026-04-24T01:33:21.751510Z",
   "order_api_called": false,
   "test_order_rules": {
     "min_order_amount": 100000,
@@ -10,6 +10,34 @@
     "max_orders_per_day": 2,
     "max_concurrent_positions": 2
   },
+  "eligible_universe_policy": {
+    "version": "v2.1_restricted_post_close",
+    "eligible_tickers": [
+      "A00001",
+      "D10004",
+      "P10001"
+    ],
+    "required_market_phase": "post_close",
+    "required_source_signal_type": "post_close_confirmed",
+    "required_final_decision": "pass",
+    "exclude_industry_stages": [
+      4,
+      5
+    ],
+    "exclude_leader_alignment": [
+      "broken"
+    ],
+    "exclude_foreign_flow_signal": [
+      "foreign_only_strong"
+    ],
+    "excluded_leader_follower_types": [
+      "후발주"
+    ],
+    "allowed_liquidity_tiers": [
+      "high",
+      "medium"
+    ]
+  },
   "result_count": 13,
   "decision_counts": {
     "pass": 4,
@@ -18,8 +46,8 @@
     "review": 1
   },
   "test_order_counts": {
-    "allowed": 1,
-    "blocked": 12
+    "allowed": 2,
+    "blocked": 11
   },
   "results": [
     {
@@ -40,7 +68,9 @@
         "intraday_execution_score": 96,
         "execution_priority": 100,
         "industry_stage": 3,
-        "leader_follower_alignment": "aligned"
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": "대표주",
+        "liquidity_tier": "high"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -49,7 +79,6 @@
         "phase_consistent"
       ],
       "blocked_reason": [
-        "ticker_not_in_eligible_universe",
         "phase_not_post_close_confirmed",
         "final_decision_not_pass"
       ],
@@ -63,11 +92,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -88,7 +117,9 @@
         "intraday_execution_score": 72,
         "execution_priority": 85,
         "industry_stage": 3,
-        "leader_follower_alignment": "aligned"
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": "대표주",
+        "liquidity_tier": "high"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -97,7 +128,6 @@
         "phase_consistent"
       ],
       "blocked_reason": [
-        "ticker_not_in_eligible_universe",
         "phase_not_post_close_confirmed",
         "final_decision_not_pass"
       ],
@@ -111,11 +141,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -137,7 +167,9 @@
         "intraday_execution_score": 40,
         "execution_priority": 70,
         "industry_stage": 3,
-        "leader_follower_alignment": "mixed"
+        "leader_follower_alignment": "mixed",
+        "leader_follower_type": "후발주",
+        "liquidity_tier": "low"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -147,8 +179,10 @@
       ],
       "blocked_reason": [
         "ticker_not_in_eligible_universe",
+        "non_leader_stock_excluded",
         "phase_not_post_close_confirmed",
-        "final_decision_not_pass"
+        "final_decision_not_pass",
+        "insufficient_liquidity"
       ],
       "max_order_amount": 300000,
       "max_order_quantity": 1,
@@ -160,11 +194,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -185,19 +219,19 @@
         "intraday_execution_score": 72,
         "execution_priority": 100,
         "industry_stage": 2,
-        "leader_follower_alignment": "aligned"
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": "대표주",
+        "liquidity_tier": "high"
       },
-      "eligible_for_test_order": false,
-      "test_order_allowed": false,
+      "eligible_for_test_order": true,
+      "test_order_allowed": true,
       "allowed_reason": [
         "required_fields_complete",
         "phase_consistent",
         "post_close_confirmed",
         "final_decision_pass"
       ],
-      "blocked_reason": [
-        "ticker_not_in_eligible_universe"
-      ],
+      "blocked_reason": [],
       "max_order_amount": 300000,
       "max_order_quantity": 1,
       "requested_order_amount": 300000,
@@ -208,11 +242,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -233,7 +267,9 @@
         "intraday_execution_score": 80,
         "execution_priority": 85,
         "industry_stage": 5,
-        "leader_follower_alignment": "aligned"
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": "대표주",
+        "liquidity_tier": "high"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -257,11 +293,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -282,7 +318,9 @@
         "intraday_execution_score": 32,
         "execution_priority": 70,
         "industry_stage": 3,
-        "leader_follower_alignment": "mixed"
+        "leader_follower_alignment": "mixed",
+        "leader_follower_type": "후발주",
+        "liquidity_tier": "low"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -293,8 +331,10 @@
       ],
       "blocked_reason": [
         "ticker_not_in_eligible_universe",
+        "non_leader_stock_excluded",
         "final_decision_not_pass",
-        "foreign_flow_only_strong"
+        "foreign_flow_only_strong",
+        "insufficient_liquidity"
       ],
       "max_order_amount": 300000,
       "max_order_quantity": 1,
@@ -306,11 +346,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -331,104 +371,9 @@
         "intraday_execution_score": 88,
         "execution_priority": 85,
         "industry_stage": 2,
-        "leader_follower_alignment": "aligned"
-      },
-      "eligible_for_test_order": false,
-      "test_order_allowed": false,
-      "allowed_reason": [
-        "required_fields_complete",
-        "phase_consistent",
-        "post_close_confirmed",
-        "final_decision_pass"
-      ],
-      "blocked_reason": [
-        "ticker_not_in_eligible_universe"
-      ],
-      "max_order_amount": 300000,
-      "max_order_quantity": 1,
-      "requested_order_amount": 300000,
-      "requested_order_quantity": 1,
-      "daily_limit": {
-        "max_orders_per_day": 2,
-        "max_total_amount_per_day": 600000,
-        "max_amount_per_ticker_per_day": 300000,
-        "max_concurrent_positions": 2
-      },
-      "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
-      ]
-    },
-    {
-      "ticker": "D20005",
-      "market_phase": "post_close",
-      "final_decision": "block",
-      "decision_reason": "차단 규칙 충족: LEADER_ALIGNMENT_BROKEN",
-      "decision_flags": [
-        "LEADER_ALIGNMENT_BROKEN"
-      ],
-      "required_next_action": "당일제외",
-      "decision_timestamp": "2026-04-21T15:39:30Z",
-      "source_signal_type": "post_close_confirmed",
-      "input_snapshot": {
-        "final_classification": "후보",
-        "intraday_classification": "not_provided",
-        "total_score": 74,
-        "intraday_execution_score": 56,
-        "execution_priority": 70,
-        "industry_stage": 2,
-        "leader_follower_alignment": "broken"
-      },
-      "eligible_for_test_order": false,
-      "test_order_allowed": false,
-      "allowed_reason": [
-        "required_fields_complete",
-        "phase_consistent",
-        "post_close_confirmed"
-      ],
-      "blocked_reason": [
-        "ticker_not_in_eligible_universe",
-        "final_decision_not_pass",
-        "leader_alignment_broken"
-      ],
-      "max_order_amount": 300000,
-      "max_order_quantity": 1,
-      "requested_order_amount": 300000,
-      "requested_order_quantity": 1,
-      "daily_limit": {
-        "max_orders_per_day": 2,
-        "max_total_amount_per_day": 600000,
-        "max_amount_per_ticker_per_day": 300000,
-        "max_concurrent_positions": 2
-      },
-      "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
-      ]
-    },
-    {
-      "ticker": "P10001",
-      "market_phase": "post_close",
-      "final_decision": "pass",
-      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
-      "decision_flags": [
-        "PASS_RULES_CONFIRMED"
-      ],
-      "required_next_action": "주문검토",
-      "decision_timestamp": "2026-04-24T03:00:00Z",
-      "source_signal_type": "post_close_confirmed",
-      "input_snapshot": {
-        "final_classification": "실행검토",
-        "intraday_classification": "temporary_breakout",
-        "total_score": 79,
-        "intraday_execution_score": 77,
-        "execution_priority": 85,
-        "industry_stage": 2,
-        "leader_follower_alignment": "aligned"
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": "대표주",
+        "liquidity_tier": "high"
       },
       "eligible_for_test_order": true,
       "test_order_allowed": true,
@@ -449,11 +394,119 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
+      ]
+    },
+    {
+      "ticker": "D20005",
+      "market_phase": "post_close",
+      "final_decision": "block",
+      "decision_reason": "차단 규칙 충족: LEADER_ALIGNMENT_BROKEN",
+      "decision_flags": [
+        "LEADER_ALIGNMENT_BROKEN"
+      ],
+      "required_next_action": "당일제외",
+      "decision_timestamp": "2026-04-21T15:39:30Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "후보",
+        "intraday_classification": "not_provided",
+        "total_score": 74,
+        "intraday_execution_score": 56,
+        "execution_priority": 70,
+        "industry_stage": 2,
+        "leader_follower_alignment": "broken",
+        "leader_follower_type": "후발주",
+        "liquidity_tier": "low"
+      },
+      "eligible_for_test_order": false,
+      "test_order_allowed": false,
+      "allowed_reason": [
+        "required_fields_complete",
+        "phase_consistent",
+        "post_close_confirmed"
+      ],
+      "blocked_reason": [
+        "ticker_not_in_eligible_universe",
+        "non_leader_stock_excluded",
+        "final_decision_not_pass",
+        "leader_alignment_broken",
+        "insufficient_liquidity",
+        "daily_order_count_limit_reached",
+        "daily_total_amount_limit_exceeded",
+        "max_concurrent_positions_reached"
+      ],
+      "max_order_amount": 300000,
+      "max_order_quantity": 1,
+      "requested_order_amount": 300000,
+      "requested_order_quantity": 1,
+      "daily_limit": {
+        "max_orders_per_day": 2,
+        "max_total_amount_per_day": 600000,
+        "max_amount_per_ticker_per_day": 300000,
+        "max_concurrent_positions": 2
+      },
+      "eligible_universe_version": "v2.1_restricted_post_close",
+      "eligible_tickers": [
+        "A00001",
+        "D10004",
+        "P10001"
+      ]
+    },
+    {
+      "ticker": "P10001",
+      "market_phase": "post_close",
+      "final_decision": "pass",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "decision_flags": [
+        "PASS_RULES_CONFIRMED"
+      ],
+      "required_next_action": "주문검토",
+      "decision_timestamp": "2026-04-24T03:00:00Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "실행검토",
+        "intraday_classification": "temporary_breakout",
+        "total_score": 79,
+        "intraday_execution_score": 77,
+        "execution_priority": 85,
+        "industry_stage": 2,
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": null,
+        "liquidity_tier": "medium"
+      },
+      "eligible_for_test_order": false,
+      "test_order_allowed": false,
+      "allowed_reason": [
+        "required_fields_complete",
+        "phase_consistent",
+        "post_close_confirmed",
+        "final_decision_pass"
+      ],
+      "blocked_reason": [
+        "daily_order_count_limit_reached",
+        "daily_total_amount_limit_exceeded",
+        "max_concurrent_positions_reached"
+      ],
+      "max_order_amount": 300000,
+      "max_order_quantity": 1,
+      "requested_order_amount": 300000,
+      "requested_order_quantity": 1,
+      "daily_limit": {
+        "max_orders_per_day": 2,
+        "max_total_amount_per_day": 600000,
+        "max_amount_per_ticker_per_day": 300000,
+        "max_concurrent_positions": 2
+      },
+      "eligible_universe_version": "v2.1_restricted_post_close",
+      "eligible_tickers": [
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -476,7 +529,9 @@
         "intraday_execution_score": 72,
         "execution_priority": 58,
         "industry_stage": 3,
-        "leader_follower_alignment": "mixed"
+        "leader_follower_alignment": "mixed",
+        "leader_follower_type": null,
+        "liquidity_tier": "low"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -487,7 +542,11 @@
       "blocked_reason": [
         "ticker_not_in_eligible_universe",
         "phase_not_post_close_confirmed",
-        "final_decision_not_pass"
+        "final_decision_not_pass",
+        "insufficient_liquidity",
+        "daily_order_count_limit_reached",
+        "daily_total_amount_limit_exceeded",
+        "max_concurrent_positions_reached"
       ],
       "max_order_amount": 300000,
       "max_order_quantity": 1,
@@ -499,11 +558,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -525,7 +584,9 @@
         "intraday_execution_score": 80,
         "execution_priority": 88,
         "industry_stage": 4,
-        "leader_follower_alignment": "aligned"
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": null,
+        "liquidity_tier": "medium"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -538,7 +599,10 @@
         "ticker_not_in_eligible_universe",
         "final_decision_not_pass",
         "industry_stage_4_or_5",
-        "foreign_flow_only_strong"
+        "foreign_flow_only_strong",
+        "daily_order_count_limit_reached",
+        "daily_total_amount_limit_exceeded",
+        "max_concurrent_positions_reached"
       ],
       "max_order_amount": 300000,
       "max_order_quantity": 1,
@@ -550,11 +614,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -575,7 +639,9 @@
         "intraday_execution_score": 81,
         "execution_priority": 79,
         "industry_stage": 3,
-        "leader_follower_alignment": "mixed"
+        "leader_follower_alignment": "mixed",
+        "leader_follower_type": null,
+        "liquidity_tier": "medium"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -586,7 +652,10 @@
       ],
       "blocked_reason": [
         "ticker_not_in_eligible_universe",
-        "final_decision_not_pass"
+        "final_decision_not_pass",
+        "daily_order_count_limit_reached",
+        "daily_total_amount_limit_exceeded",
+        "max_concurrent_positions_reached"
       ],
       "max_order_amount": 300000,
       "max_order_quantity": 1,
@@ -598,11 +667,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     },
     {
@@ -623,7 +692,9 @@
         "intraday_execution_score": 78,
         "execution_priority": 86,
         "industry_stage": 2,
-        "leader_follower_alignment": "aligned"
+        "leader_follower_alignment": "aligned",
+        "leader_follower_type": null,
+        "liquidity_tier": "medium"
       },
       "eligible_for_test_order": false,
       "test_order_allowed": false,
@@ -634,9 +705,12 @@
         "final_decision_pass"
       ],
       "blocked_reason": [
+        "ticker_not_in_eligible_universe",
         "requested_amount_exceeds_max_per_order",
+        "daily_order_count_limit_reached",
         "daily_total_amount_limit_exceeded",
-        "daily_ticker_amount_limit_exceeded"
+        "daily_ticker_amount_limit_exceeded",
+        "max_concurrent_positions_reached"
       ],
       "max_order_amount": 300000,
       "max_order_quantity": 1,
@@ -648,11 +722,11 @@
         "max_amount_per_ticker_per_day": 300000,
         "max_concurrent_positions": 2
       },
+      "eligible_universe_version": "v2.1_restricted_post_close",
       "eligible_tickers": [
-        "005930",
-        "000660",
-        "P10001",
-        "L10005"
+        "A00001",
+        "D10004",
+        "P10001"
       ]
     }
   ]
