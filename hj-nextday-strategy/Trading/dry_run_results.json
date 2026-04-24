@@ -1,0 +1,269 @@
+{
+  "generated_at": "2026-04-24T00:05:09.390059Z",
+  "order_api_called": false,
+  "result_count": 12,
+  "decision_counts": {
+    "pass": 5,
+    "hold": 2,
+    "block": 4,
+    "review": 1
+  },
+  "results": [
+    {
+      "ticker": "A00001",
+      "market_phase": "intraday",
+      "final_decision": "pass",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "decision_flags": [
+        "PASS_RULES_CONFIRMED"
+      ],
+      "required_next_action": "주문검토",
+      "decision_timestamp": "2026-04-23T02:34:50Z",
+      "source_signal_type": "intraday_temporary",
+      "input_snapshot": {
+        "final_classification": "실행검토",
+        "intraday_classification": "실행검토",
+        "total_score": 96,
+        "intraday_execution_score": 96,
+        "execution_priority": 100,
+        "industry_stage": 3,
+        "leader_follower_alignment": "aligned"
+      }
+    },
+    {
+      "ticker": "D10004",
+      "market_phase": "intraday",
+      "final_decision": "pass",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "decision_flags": [
+        "PASS_RULES_CONFIRMED"
+      ],
+      "required_next_action": "주문검토",
+      "decision_timestamp": "2026-04-23T02:34:47Z",
+      "source_signal_type": "intraday_temporary",
+      "input_snapshot": {
+        "final_classification": "매수대기",
+        "intraday_classification": "매수대기",
+        "total_score": 72,
+        "intraday_execution_score": 72,
+        "execution_priority": 85,
+        "industry_stage": 3,
+        "leader_follower_alignment": "aligned"
+      }
+    },
+    {
+      "ticker": "C00003",
+      "market_phase": "intraday",
+      "final_decision": "hold",
+      "decision_reason": "보류 규칙 충족: FINAL_CLASSIFICATION_CANDIDATE, LEADER_ALIGNMENT_MIXED",
+      "decision_flags": [
+        "FINAL_CLASSIFICATION_CANDIDATE",
+        "LEADER_ALIGNMENT_MIXED"
+      ],
+      "required_next_action": "관찰지속",
+      "decision_timestamp": "2026-04-23T02:34:31Z",
+      "source_signal_type": "intraday_temporary",
+      "input_snapshot": {
+        "final_classification": "후보",
+        "intraday_classification": "후보",
+        "total_score": 40,
+        "intraday_execution_score": 40,
+        "execution_priority": 70,
+        "industry_stage": 3,
+        "leader_follower_alignment": "mixed"
+      }
+    },
+    {
+      "ticker": "A00001",
+      "market_phase": "post_close",
+      "final_decision": "pass",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "decision_flags": [
+        "PASS_RULES_CONFIRMED"
+      ],
+      "required_next_action": "주문검토",
+      "decision_timestamp": "2026-04-21T15:39:10Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "실행검토",
+        "intraday_classification": "not_provided",
+        "total_score": 85,
+        "intraday_execution_score": 72,
+        "execution_priority": 100,
+        "industry_stage": 2,
+        "leader_follower_alignment": "aligned"
+      }
+    },
+    {
+      "ticker": "B00002",
+      "market_phase": "post_close",
+      "final_decision": "block",
+      "decision_reason": "차단 규칙 충족: INDUSTRY_STAGE_HIGH",
+      "decision_flags": [
+        "INDUSTRY_STAGE_HIGH"
+      ],
+      "required_next_action": "당일제외",
+      "decision_timestamp": "2026-04-21T15:39:15Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "매수대기",
+        "intraday_classification": "not_provided",
+        "total_score": 85,
+        "intraday_execution_score": 80,
+        "execution_priority": 85,
+        "industry_stage": 5,
+        "leader_follower_alignment": "aligned"
+      }
+    },
+    {
+      "ticker": "C00003",
+      "market_phase": "post_close",
+      "final_decision": "block",
+      "decision_reason": "차단 규칙 충족: FOREIGN_FLOW_ONLY_STRONG",
+      "decision_flags": [
+        "FOREIGN_FLOW_ONLY_STRONG"
+      ],
+      "required_next_action": "당일제외",
+      "decision_timestamp": "2026-04-21T15:39:18Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "후보",
+        "intraday_classification": "not_provided",
+        "total_score": 56,
+        "intraday_execution_score": 32,
+        "execution_priority": 70,
+        "industry_stage": 3,
+        "leader_follower_alignment": "mixed"
+      }
+    },
+    {
+      "ticker": "D10004",
+      "market_phase": "post_close",
+      "final_decision": "pass",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "decision_flags": [
+        "PASS_RULES_CONFIRMED"
+      ],
+      "required_next_action": "주문검토",
+      "decision_timestamp": "2026-04-21T15:39:22Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "매수대기",
+        "intraday_classification": "not_provided",
+        "total_score": 78,
+        "intraday_execution_score": 88,
+        "execution_priority": 85,
+        "industry_stage": 2,
+        "leader_follower_alignment": "aligned"
+      }
+    },
+    {
+      "ticker": "D20005",
+      "market_phase": "post_close",
+      "final_decision": "block",
+      "decision_reason": "차단 규칙 충족: LEADER_ALIGNMENT_BROKEN",
+      "decision_flags": [
+        "LEADER_ALIGNMENT_BROKEN"
+      ],
+      "required_next_action": "당일제외",
+      "decision_timestamp": "2026-04-21T15:39:30Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "후보",
+        "intraday_classification": "not_provided",
+        "total_score": 74,
+        "intraday_execution_score": 56,
+        "execution_priority": 70,
+        "industry_stage": 2,
+        "leader_follower_alignment": "broken"
+      }
+    },
+    {
+      "ticker": "P10001",
+      "market_phase": "post_close",
+      "final_decision": "pass",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "decision_flags": [
+        "PASS_RULES_CONFIRMED"
+      ],
+      "required_next_action": "주문검토",
+      "decision_timestamp": "2026-04-24T03:00:00Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "실행검토",
+        "intraday_classification": "temporary_breakout",
+        "total_score": 79,
+        "intraday_execution_score": 77,
+        "execution_priority": 85,
+        "industry_stage": 2,
+        "leader_follower_alignment": "aligned"
+      }
+    },
+    {
+      "ticker": "H10002",
+      "market_phase": "intraday",
+      "final_decision": "hold",
+      "decision_reason": "보류 규칙 충족: TOTAL_SCORE_BELOW_PASS, EXECUTION_PRIORITY_MID_BAND, LEADER_ALIGNMENT_MIXED",
+      "decision_flags": [
+        "TOTAL_SCORE_BELOW_PASS",
+        "EXECUTION_PRIORITY_MID_BAND",
+        "LEADER_ALIGNMENT_MIXED"
+      ],
+      "required_next_action": "관찰지속",
+      "decision_timestamp": "2026-04-24T03:00:30Z",
+      "source_signal_type": "intraday_temporary",
+      "input_snapshot": {
+        "final_classification": "매수대기",
+        "intraday_classification": "temporary_watch",
+        "total_score": 68,
+        "intraday_execution_score": 72,
+        "execution_priority": 58,
+        "industry_stage": 3,
+        "leader_follower_alignment": "mixed"
+      }
+    },
+    {
+      "ticker": "B10003",
+      "market_phase": "post_close",
+      "final_decision": "block",
+      "decision_reason": "차단 규칙 충족: INDUSTRY_STAGE_HIGH, FOREIGN_FLOW_ONLY_STRONG",
+      "decision_flags": [
+        "INDUSTRY_STAGE_HIGH",
+        "FOREIGN_FLOW_ONLY_STRONG"
+      ],
+      "required_next_action": "당일제외",
+      "decision_timestamp": "2026-04-24T03:01:00Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "실행검토",
+        "intraday_classification": "temporary_breakout",
+        "total_score": 82,
+        "intraday_execution_score": 80,
+        "execution_priority": 88,
+        "industry_stage": 4,
+        "leader_follower_alignment": "aligned"
+      }
+    },
+    {
+      "ticker": "R10004",
+      "market_phase": "post_close",
+      "final_decision": "review",
+      "decision_reason": "점수는 상위권이나 정렬 상태가 엇갈려 수동 검토 필요",
+      "decision_flags": [
+        "REVIEW_SCORE_ALIGNMENT_CONFLICT"
+      ],
+      "required_next_action": "수동검토",
+      "decision_timestamp": "2026-04-24T03:01:30Z",
+      "source_signal_type": "post_close_confirmed",
+      "input_snapshot": {
+        "final_classification": "실행검토",
+        "intraday_classification": "temporary_breakout",
+        "total_score": 84,
+        "intraday_execution_score": 81,
+        "execution_priority": 79,
+        "industry_stage": 3,
+        "leader_follower_alignment": "mixed"
+      }
+    }
+  ]
+}
