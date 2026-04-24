@@ -84,6 +84,29 @@
       "required_fields_complete": true,
       "phase_consistency": true,
       "decision_timestamp": "2026-04-24T03:01:30Z"
+    },
+    {
+      "scenario_id": "LIMIT_BLOCK_SAMPLE",
+      "ticker": "L10005",
+      "market_phase": "post_close",
+      "source_signal_type": "post_close_confirmed",
+      "final_classification": "실행검토",
+      "intraday_classification": "temporary_breakout",
+      "total_score": 80,
+      "intraday_execution_score": 78,
+      "execution_priority": 86,
+      "priority_reason": "신호는 양호하나 테스트 한도 점검 필요",
+      "industry_stage": 2,
+      "leader_follower_alignment": "aligned",
+      "recent_change_summary": "거래량 증가와 추세 지속",
+      "foreign_flow_signal": "broad_participation",
+      "intraday_noise_flag": false,
+      "evidence_strength": "strong",
+      "required_fields_complete": true,
+      "phase_consistency": true,
+      "requested_order_amount": 350000,
+      "requested_order_quantity": 1,
+      "decision_timestamp": "2026-04-24T03:02:00Z"
     }
   ]
 }

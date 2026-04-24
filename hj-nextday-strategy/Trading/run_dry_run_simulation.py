@@ -9,6 +9,8 @@ POST_CLOSE_PATH = ROOT / "INTEGRATED_SIGNAL_BOARD.json"
 SCENARIO_PATH = ROOT / "examples" / "dry_run_scenarios.sample.json"
 OUTPUT_JSON_PATH = ROOT / "dry_run_results.json"
 OUTPUT_LOG_PATH = ROOT / "dry_run.log"
+TEST_ORDER_OUTPUT_JSON_PATH = ROOT / "dry_run_test_order_results.json"
+TEST_ORDER_OUTPUT_LOG_PATH = ROOT / "dry_run_test_order.log"
 
 TOTAL_SCORE_PASS_MIN = 70
 INTRADAY_EXEC_PASS_MIN = 65
@@ -22,6 +24,17 @@ NEXT_ACTION_MAP = {
     "block": "당일제외",
     "review": "수동검토",
 }
+
+TEST_ORDER_RULES = {
+    "min_order_amount": 100_000,
+    "min_order_quantity": 1,
+    "max_order_amount": 300_000,
+    "max_amount_per_ticker_per_day": 300_000,
+    "max_total_amount_per_day": 600_000,
+    "max_orders_per_day": 2,
+    "max_concurrent_positions": 2,
+}
+ELIGIBLE_TICKERS = ["005930", "000660", "P10001", "L10005"]
 
 
 def load_json(path: Path) -> Dict:
@@ -155,6 +168,95 @@ def evaluate_final_decision(payload: Dict) -> Tuple[str, List[str], str]:
     return "hold", ["FALLBACK_HOLD"], "명확한 통과/차단 조건이 부족하여 보류"
 
 
+def evaluate_test_order_eligibility(
+    record: Dict,
+    dry_run_row: Dict,
+    state: Dict,
+) -> Dict:
+    allowed_reason: List[str] = []
+    blocked_reason: List[str] = []
+
+    min_order_amount = TEST_ORDER_RULES["min_order_amount"]
+    min_order_quantity = TEST_ORDER_RULES["min_order_quantity"]
+    max_order_amount = TEST_ORDER_RULES["max_order_amount"]
+
+    requested_amount = int(record.get("requested_order_amount", max_order_amount))
+    requested_quantity = int(record.get("requested_order_quantity", 1))
+
+    if record["ticker"] not in ELIGIBLE_TICKERS:
+        blocked_reason.append("ticker_not_in_eligible_universe")
+
+    if record.get("required_fields_complete") is True:
+        allowed_reason.append("required_fields_complete")
+    else:
+        blocked_reason.append("required_fields_incomplete")
+
+    if record.get("phase_consistency") is True:
+        allowed_reason.append("phase_consistent")
+    else:
+        blocked_reason.append("phase_conflict")
+
+    if record.get("market_phase") == "post_close" and record.get("source_signal_type") == "post_close_confirmed":
+        allowed_reason.append("post_close_confirmed")
+    else:
+        blocked_reason.append("phase_not_post_close_confirmed")
+
+    if dry_run_row["final_decision"] == "pass":
+        allowed_reason.append("final_decision_pass")
+    else:
+        blocked_reason.append("final_decision_not_pass")
+
+    if record.get("industry_stage", 0) >= 4:
+        blocked_reason.append("industry_stage_4_or_5")
+    if record.get("leader_follower_alignment") == "broken":
+        blocked_reason.append("leader_alignment_broken")
+    if record.get("foreign_flow_signal") == "foreign_only_strong":
+        blocked_reason.append("foreign_flow_only_strong")
+    if record.get("intraday_noise_flag") is True:
+        blocked_reason.append("recent_noise_spike")
+
+    if requested_amount < min_order_amount:
+        blocked_reason.append("requested_amount_below_minimum")
+    if requested_quantity < min_order_quantity:
+        blocked_reason.append("requested_quantity_below_minimum")
+    if requested_amount > max_order_amount:
+        blocked_reason.append("requested_amount_exceeds_max_per_order")
+
+    if state["orders_today"] >= TEST_ORDER_RULES["max_orders_per_day"]:
+        blocked_reason.append("daily_order_count_limit_reached")
+    if state["total_amount_today"] + requested_amount > TEST_ORDER_RULES["max_total_amount_per_day"]:
+        blocked_reason.append("daily_total_amount_limit_exceeded")
+    ticker_amount = state["per_ticker_amount"].get(record["ticker"], 0)
+    if ticker_amount + requested_amount > TEST_ORDER_RULES["max_amount_per_ticker_per_day"]:
+        blocked_reason.append("daily_ticker_amount_limit_exceeded")
+    if len(state["positions"]) >= TEST_ORDER_RULES["max_concurrent_positions"] and record["ticker"] not in state["positions"]:
+        blocked_reason.append("max_concurrent_positions_reached")
+
+    is_allowed = len(blocked_reason) == 0
+    if is_allowed:
+        state["orders_today"] += 1
+        state["total_amount_today"] += requested_amount
+        state["per_ticker_amount"][record["ticker"]] = ticker_amount + requested_amount
+        state["positions"].add(record["ticker"])
+
+    return {
+        "eligible_for_test_order": is_allowed,
+        "test_order_allowed": is_allowed,
+        "allowed_reason": allowed_reason,
+        "blocked_reason": blocked_reason,
+        "max_order_amount": max_order_amount,
+        "max_order_quantity": min_order_quantity,
+        "requested_order_amount": requested_amount,
+        "requested_order_quantity": requested_quantity,
+        "daily_limit": {
+            "max_orders_per_day": TEST_ORDER_RULES["max_orders_per_day"],
+            "max_total_amount_per_day": TEST_ORDER_RULES["max_total_amount_per_day"],
+            "max_amount_per_ticker_per_day": TEST_ORDER_RULES["max_amount_per_ticker_per_day"],
+            "max_concurrent_positions": TEST_ORDER_RULES["max_concurrent_positions"],
+        },
+    }
+
+
 def run_dry_run() -> Dict:
     intraday = load_json(INTRADAY_PATH)
     post_close = load_json(POST_CLOSE_PATH)
@@ -172,39 +274,54 @@ def run_dry_run() -> Dict:
         records.append(scenario)
 
     results = []
+    test_order_results = []
+    daily_state = {
+        "orders_today": 0,
+        "total_amount_today": 0,
+        "per_ticker_amount": {},
+        "positions": set(),
+    }
     for record in records:
         decision, flags, reason = evaluate_final_decision(record)
-        results.append(
-            {
-                "ticker": record["ticker"],
-                "market_phase": record["market_phase"],
-                "final_decision": decision,
-                "decision_reason": reason,
-                "decision_flags": flags,
-                "required_next_action": NEXT_ACTION_MAP[decision],
-                "decision_timestamp": record.get("decision_timestamp", now_iso()),
-                "source_signal_type": record["source_signal_type"],
-                "input_snapshot": {
-                    "final_classification": record.get("final_classification"),
-                    "intraday_classification": record.get("intraday_classification"),
-                    "total_score": record.get("total_score"),
-                    "intraday_execution_score": record.get("intraday_execution_score"),
-                    "execution_priority": record.get("execution_priority"),
-                    "industry_stage": record.get("industry_stage"),
-                    "leader_follower_alignment": record.get("leader_follower_alignment"),
-                },
-            }
-        )
+        dry_row = {
+            "ticker": record["ticker"],
+            "market_phase": record["market_phase"],
+            "final_decision": decision,
+            "decision_reason": reason,
+            "decision_flags": flags,
+            "required_next_action": NEXT_ACTION_MAP[decision],
+            "decision_timestamp": record.get("decision_timestamp", now_iso()),
+            "source_signal_type": record["source_signal_type"],
+            "input_snapshot": {
+                "final_classification": record.get("final_classification"),
+                "intraday_classification": record.get("intraday_classification"),
+                "total_score": record.get("total_score"),
+                "intraday_execution_score": record.get("intraday_execution_score"),
+                "execution_priority": record.get("execution_priority"),
+                "industry_stage": record.get("industry_stage"),
+                "leader_follower_alignment": record.get("leader_follower_alignment"),
+            },
+        }
+        test_eval = evaluate_test_order_eligibility(record, dry_row, daily_state)
+        dry_row.update(test_eval)
+        dry_row["eligible_tickers"] = ELIGIBLE_TICKERS
+        results.append(dry_row)
+        test_order_results.append(dry_row)
 
     summary = {
         "generated_at": now_iso(),
         "order_api_called": False,
+        "test_order_rules": TEST_ORDER_RULES,
         "result_count": len(results),
         "decision_counts": {
             "pass": sum(1 for r in results if r["final_decision"] == "pass"),
             "hold": sum(1 for r in results if r["final_decision"] == "hold"),
             "block": sum(1 for r in results if r["final_decision"] == "block"),
             "review": sum(1 for r in results if r["final_decision"] == "review"),
+        },
+        "test_order_counts": {
+            "allowed": sum(1 for r in test_order_results if r["test_order_allowed"] is True),
+            "blocked": sum(1 for r in test_order_results if r["test_order_allowed"] is False),
         },
         "results": results,
     }
@@ -214,12 +331,14 @@ def run_dry_run() -> Dict:
 
 def write_outputs(summary: Dict) -> None:
     OUTPUT_JSON_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    TEST_ORDER_OUTPUT_JSON_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = [
         f"dry-run generated_at={summary['generated_at']}",
         "ORDER_API_CALLED=false",
         f"result_count={summary['result_count']}",
         "decision_counts=" + json.dumps(summary["decision_counts"], ensure_ascii=False),
+        "test_order_counts=" + json.dumps(summary["test_order_counts"], ensure_ascii=False),
     ]
     for row in summary["results"]:
         lines.append(
@@ -231,11 +350,15 @@ def write_outputs(summary: Dict) -> None:
                     row["final_decision"],
                     row["required_next_action"],
                     row["decision_reason"],
+                    f"test_order_allowed={row['test_order_allowed']}",
+                    f"allowed_reason={','.join(row['allowed_reason'])}",
+                    f"blocked_reason={','.join(row['blocked_reason'])}",
                 ]
             )
         )
 
     OUTPUT_LOG_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    TEST_ORDER_OUTPUT_LOG_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main() -> None:
@@ -243,7 +366,10 @@ def main() -> None:
     write_outputs(summary)
     print(f"Generated: {OUTPUT_JSON_PATH}")
     print(f"Generated: {OUTPUT_LOG_PATH}")
+    print(f"Generated: {TEST_ORDER_OUTPUT_JSON_PATH}")
+    print(f"Generated: {TEST_ORDER_OUTPUT_LOG_PATH}")
     print(f"Decision counts: {summary['decision_counts']}")
+    print(f"Test order counts: {summary['test_order_counts']}")
 
 
 if __name__ == "__main__":
