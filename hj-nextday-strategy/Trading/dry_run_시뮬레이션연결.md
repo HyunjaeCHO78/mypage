@@ -41,3 +41,21 @@ python Trading/run_dry_run_simulation.py
 2. 차단 플래그(`INDUSTRY_STAGE_HIGH`, `FOREIGN_FLOW_ONLY_STRONG` 등)의 오탐률 확인
 3. review 케이스 수동 승인 프로세스(담당자/체크리스트/승인 로그) 확정
 4. 주문 API 연결 시점에도 `order_api_called` 가드가 환경별로 안전하게 분기되는지 재검증
+
+## 6. 자동주문 직전 게이트 검증(신규)
+실주문 연결 직전에는 아래 검증을 추가로 실행한다.
+
+```bash
+python Trading/validate_pre_live_order_gate.py
+```
+
+생성 파일:
+- `Trading/pre_live_order_gate_report.json`
+
+검증 포인트:
+- phase/source 매핑 충돌 차단
+- 필수 필드/판정 필드 누락 차단
+- `ORDER_API_CALLED=false` 가드 확인
+- `pass` 케이스의 보수적 안전조건(post_close 확정신호, 차단 플래그 없음, 리스크 조건) 점검
+
+> 본 검증은 실주문 API를 호출하지 않고, "연결 허용 가능 여부"만 판정한다.

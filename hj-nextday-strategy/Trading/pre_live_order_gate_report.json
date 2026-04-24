@@ -1,0 +1,33 @@
+{
+  "validated_at": "2026-04-24T00:18:12.349406Z",
+  "status": "pass",
+  "checks": {
+    "phase_separation": true,
+    "required_fields": true,
+    "decision_fields": true,
+    "bridge_format": true,
+    "dry_run_result": true,
+    "order_api_guard": true,
+    "log_written": true
+  },
+  "failure_reasons": [],
+  "live_order_connection_allowed": true,
+  "eligible_candidates": [
+    {
+      "ticker": "A00001",
+      "decision_timestamp": "2026-04-21T15:39:10Z",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능"
+    },
+    {
+      "ticker": "D10004",
+      "decision_timestamp": "2026-04-21T15:39:22Z",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능"
+    },
+    {
+      "ticker": "P10001",
+      "decision_timestamp": "2026-04-24T03:00:00Z",
+      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능"
+    }
+  ],
+  "note": "실주문 API는 본 검증에서 호출하지 않으며, 허용 기준 점검만 수행한다."
+}

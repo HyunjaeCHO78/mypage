@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-24T00:05:09.390059Z",
+  "generated_at": "2026-04-24T00:18:12.290317Z",
   "order_api_called": false,
   "result_count": 12,
   "decision_counts": {
-    "pass": 5,
-    "hold": 2,
+    "pass": 3,
+    "hold": 4,
     "block": 4,
     "review": 1
   },
@@ -12,12 +12,12 @@
     {
       "ticker": "A00001",
       "market_phase": "intraday",
-      "final_decision": "pass",
-      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "final_decision": "hold",
+      "decision_reason": "명확한 통과/차단 조건이 부족하여 보류",
       "decision_flags": [
-        "PASS_RULES_CONFIRMED"
+        "FALLBACK_HOLD"
       ],
-      "required_next_action": "주문검토",
+      "required_next_action": "관찰지속",
       "decision_timestamp": "2026-04-23T02:34:50Z",
       "source_signal_type": "intraday_temporary",
       "input_snapshot": {
@@ -33,12 +33,12 @@
     {
       "ticker": "D10004",
       "market_phase": "intraday",
-      "final_decision": "pass",
-      "decision_reason": "장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능",
+      "final_decision": "hold",
+      "decision_reason": "명확한 통과/차단 조건이 부족하여 보류",
       "decision_flags": [
-        "PASS_RULES_CONFIRMED"
+        "FALLBACK_HOLD"
       ],
-      "required_next_action": "주문검토",
+      "required_next_action": "관찰지속",
       "decision_timestamp": "2026-04-23T02:34:47Z",
       "source_signal_type": "intraday_temporary",
       "input_snapshot": {
