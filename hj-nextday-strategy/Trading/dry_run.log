@@ -1,0 +1,16 @@
+dry-run generated_at=2026-04-24T00:05:09.390059Z
+ORDER_API_CALLED=false
+result_count=12
+decision_counts={"pass": 5, "hold": 2, "block": 4, "review": 1}
+A00001 | intraday | intraday_temporary | pass | 주문검토 | 장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능
+D10004 | intraday | intraday_temporary | pass | 주문검토 | 장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능
+C00003 | intraday | intraday_temporary | hold | 관찰지속 | 보류 규칙 충족: FINAL_CLASSIFICATION_CANDIDATE, LEADER_ALIGNMENT_MIXED
+A00001 | post_close | post_close_confirmed | pass | 주문검토 | 장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능
+B00002 | post_close | post_close_confirmed | block | 당일제외 | 차단 규칙 충족: INDUSTRY_STAGE_HIGH
+C00003 | post_close | post_close_confirmed | block | 당일제외 | 차단 규칙 충족: FOREIGN_FLOW_ONLY_STRONG
+D10004 | post_close | post_close_confirmed | pass | 주문검토 | 장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능
+D20005 | post_close | post_close_confirmed | block | 당일제외 | 차단 규칙 충족: LEADER_ALIGNMENT_BROKEN
+P10001 | post_close | post_close_confirmed | pass | 주문검토 | 장중/장후 근거와 정합성이 모두 충족되어 주문 검토 가능
+H10002 | intraday | intraday_temporary | hold | 관찰지속 | 보류 규칙 충족: TOTAL_SCORE_BELOW_PASS, EXECUTION_PRIORITY_MID_BAND, LEADER_ALIGNMENT_MIXED
+B10003 | post_close | post_close_confirmed | block | 당일제외 | 차단 규칙 충족: INDUSTRY_STAGE_HIGH, FOREIGN_FLOW_ONLY_STRONG
+R10004 | post_close | post_close_confirmed | review | 수동검토 | 점수는 상위권이나 정렬 상태가 엇갈려 수동 검토 필요
